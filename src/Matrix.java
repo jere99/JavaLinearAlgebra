@@ -88,4 +88,32 @@ public class Matrix implements Cloneable {
 		return result;
 	}
 	
+	/**
+	 * Sets a row in this Matrix.
+	 * 
+	 * @param i the index of the row to set
+	 * @param newRow the contents of the new row
+	 * @return the old row at the same index
+	 * @throws IllegalArgumentException if {@code i} is negative or exceeds the valid indices of rows in this Matrix
+	 */
+	public double[] setRow(int i, double[] newRow) {
+		if(i < 0 || i >= contents.length)
+			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
+		double[] old = contents[i];
+		contents[i] = newRow;
+		return old;
+	}
+	
+	/**
+	 * Sets the entire contents of this Matrix.
+	 * 
+	 * @param newContents the contents to set
+	 * @return the old contents
+	 */
+	public double[][] setContents(double[][] newContents) {
+		double[][] old = contents;
+		contents = newContents;
+		return old;
+	}
+	
 }
