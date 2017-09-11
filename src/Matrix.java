@@ -11,11 +11,11 @@ public class Matrix implements Cloneable {
 	/**
 	 * Initializes an m x n Matrix without any initial contents.
 	 * 
-	 * @param m the number of rows in the matrix
-	 * @param n the number of columns in the matrix
+	 * @param n the number of rows in the matrix
+	 * @param m the number of columns in the matrix
 	 */
-	public Matrix(int m, int n) {
-		contents = new double[m][n];
+	public Matrix(int n, int m) {
+		contents = new double[n][m];
 	}
 	
 	/**
