@@ -116,4 +116,61 @@ public class Matrix implements Cloneable {
 		return old;
 	}
 	
+	//================================================================================
+    // Elementary Row Operations
+    //================================================================================
+	
+	/**
+	 * Divides a row in this Matrix by a non-zero scalar.
+	 * 
+	 * @param i the index of the row to set
+	 * @param scalar the non-zero number to divide by
+	 * @throws IllegalArgumentException if {@code scalar == 0} or if {@code i] is negative or exceeds the valid indices of rows in this Matrix
+	 */
+	public void divideRow(int i, double scalar) {
+		if(scalar == 0)
+			throw new IllegalArgumentException("Cannot divide a row by 0.");
+		if(i < 0 || i >= contents.length)
+			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
+		
+		for(int j = 0; j < contents[i].length; j++)
+			contents[i][j] /= scalar;
+	}
+	
+	/**
+	 * Subtracts a multiple of one row in this Matrix from another one.
+	 * 
+	 * @param iTarget the row which will be subtracted from
+	 * @param multiple the number to multiply the source row by before subtracting
+	 * @param iSource the row to subtract from the target row
+	 * @throws IllegalArgumentException if {@code iTarget} or {@code iSource} is negative or exceeds the valid indices of rows in this Matrix
+	 */
+	public void subtractRow(int iTarget, double multiple, int iSource) {
+		if(iTarget < 0 || iTarget >= contents.length)
+			throw new IllegalArgumentException("The paramter iTarget was not in the valid range [0, " + (contents.length - 1) + "].");
+		if(iSource < 0 || iSource >= contents.length)
+			throw new IllegalArgumentException("The paramter iSource was not in the valid range [0, " + (contents.length - 1) + "].");
+		
+		for(int j = 0; j < contents[iTarget].length; j++)
+			contents[iTarget][j] -= contents[iSource][j] * multiple;
+	}
+	
+	/**
+	 * Swaps the contents of two rows in this Matrix.
+	 * 
+	 * @param i1 the first row to swap
+	 * @param i2 the second row to swap
+	 * @throws IllegalArgumentException if {@code i1} or {@code i2} is negative or exceeds the valid indices of rows in this Matrix
+	 */
+	public void swapRows(int i1, int i2) {
+		if(i1 < 0 || i1 >= contents.length)
+			throw new IllegalArgumentException("The paramter i1 was not in the valid range [0, " + (contents.length - 1) + "].");
+		if(i2 < 0 || i2 >= contents.length)
+			throw new IllegalArgumentException("The paramter i2 was not in the valid range [0, " + (contents.length - 1) + "].");
+		
+		double[] temp = contents[i1];
+		contents[i1] = contents[i2];
+		contents[i2] = temp;
+	}
+	
 }
