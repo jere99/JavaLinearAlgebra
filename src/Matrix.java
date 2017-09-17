@@ -325,6 +325,28 @@ public class Matrix implements Cloneable {
 		return product;
 	}
 	
+	/**
+	 * Calculates the result of multiplying this Matrix by another Matrix.
+	 * Note that this function is not commutative; in other words for Matrices m1 and m2
+	 * <blockquote>
+	 * m1.matrixMultiply(m2).equals(m2.matrixMultiply(m1))
+	 * </blockquote>
+	 * will not necessarily have a value of true.
+	 * 
+	 * @param m the Matrix to multiply by
+	 * @return the product of the Matrices
+	 */
+	public Matrix matrixMultiply(Matrix m) {
+		if(this.contents[0].length != m.contents.length)
+			throw new ArithmeticException("The number of columns in the first Matrix must match the number of rows in the second to multiply them.");
+		
+		Matrix product = new Matrix(this.contents.length, m.contents[0].length);
+		for(int i = 0; i < product.contents.length; i++)
+			for(int j = 0; j < product.contents[0].length; j++)
+				product.contents[i][j] = dotProduct(this.contents[i], m.getColumnVector(j));
+		return product;
+	}
+	
 	//================================================================================
     // Vector Operations
     //================================================================================
