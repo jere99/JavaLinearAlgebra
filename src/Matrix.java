@@ -168,8 +168,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	//================================================================================
-    // Elementary Row Operations
-    //================================================================================
+	// Elementary Row Operations
+	//================================================================================
 	
 	/**
 	 * Divides a row in this Matrix by a non-zero scalar.
@@ -225,8 +225,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	//================================================================================
-    // Matrix Operations
-    //================================================================================
+	// Matrix Operations
+	//================================================================================
 	
 	/**
 	 * Uses Gauss-Jordan elimination to determine the reduced row echelon form of this Matrix.
@@ -348,8 +348,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	//================================================================================
-    // Vector Operations
-    //================================================================================
+	// Vector Operations
+	//================================================================================
 	
 	/**
 	 * Calculates the dot product of two vectors.
