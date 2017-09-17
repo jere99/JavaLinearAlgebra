@@ -282,4 +282,18 @@ public class Matrix implements Cloneable {
 		return sum;
 	}
 	
+	/**
+	 * Calculates the product of this Matrix and a scalar quantity.
+	 * 
+	 * @param scalar the scalar to multiply by
+	 * @return the product of the Matrix and the scalar
+	 */
+	public Matrix scalarMultiply(double scalar) {
+		Matrix product = this.clone();
+		for(int i = 0; i < product.contents.length; i++)
+			for(int j = 0; j < product.contents[0].length; j++)
+				product.contents[i][j] *= scalar;
+		return product;
+	}
+	
 }
