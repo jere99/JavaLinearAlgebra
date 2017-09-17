@@ -325,4 +325,26 @@ public class Matrix implements Cloneable {
 		return product;
 	}
 	
+	//================================================================================
+    // Vector Operations
+    //================================================================================
+	
+	/**
+	 * Calculates the dot product of two vectors.
+	 * The two vectors must have the same number of components.
+	 * 
+	 * @param v the first vector
+	 * @param w the second vector
+	 * @return the dot product of the vectors
+	 * @throws ArithmeticException if the vectors have different numbers of components
+	 */
+	public static double dotProduct(double[] v, double[] w) {
+		if(v.length != w.length)
+			throw new ArithmeticException("The number of components in the two vectors must match to perform the dot product operation.");
+		double sum = 0;
+		for(int i = 0; i < v.length; i++)
+			sum += v[i] * w[i];
+		return sum;
+	}
+	
 }
