@@ -6,7 +6,20 @@
  */
 public class Matrix implements Cloneable {
 	
+	/**
+	 * The main contents of this n x m Matrix.
+	 */
 	private double[][] contents;
+	
+	/**
+	 * Cached reduced row echelon form so it only needs to be calculated once.
+	 */
+	private Matrix rref = null;
+	
+	/**
+	 * Cached value for the rank of the Matrix so it only needs to be calculated once.
+	 */
+	private int rank = -1;
 	
 	/**
 	 * Initializes an m x n Matrix without any initial contents.
@@ -36,7 +49,10 @@ public class Matrix implements Cloneable {
 		for(int i = 0; i < contents.length; i++)
 			for(int j = 0; j < contents[0].length; j++)
 				copy[i][j] = contents[i][j];
-		return new Matrix(copy);
+		Matrix result = new Matrix(copy);
+		if(this.rref != null)
+			result.rref = this.rref.clone();
+		return result;
 	}
 	
 	/**
@@ -94,6 +110,7 @@ public class Matrix implements Cloneable {
 	public double[] setRow(int i, double[] newRow) {
 		if(i < 0 || i >= contents.length)
 			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
+		clearCache();
 		double[] old = contents[i];
 		contents[i] = newRow;
 		return old;
@@ -106,9 +123,19 @@ public class Matrix implements Cloneable {
 	 * @return the old contents
 	 */
 	public double[][] setContents(double[][] newContents) {
+		clearCache();
 		double[][] old = contents;
 		contents = newContents;
 		return old;
+	}
+	
+	/**
+	 * Resets the cached rref and rank fields.
+	 * Should be called whenever the contents of this Matrix change by means of anything other than an elementary row operation.
+	 */
+	private void clearCache() {
+		rref = null;
+		rank = -1;
 	}
 	
 	//================================================================================
@@ -166,6 +193,75 @@ public class Matrix implements Cloneable {
 		double[] temp = contents[i1];
 		contents[i1] = contents[i2];
 		contents[i2] = temp;
+	}
+	
+	//================================================================================
+    // Matrix Operations
+    //================================================================================
+	
+	/**
+	 * Uses Gauss-Jordan elimination to determine the reduced row echelon form of this Matrix.
+	 * 
+	 * @return the reduced row echelon form
+	 */
+	public Matrix rref() {
+		if(rref != null)
+			return rref;
+		Matrix rref = this.clone();
+		
+		for(int i = 0, j = 0; i < rref.contents.length; i++) {
+			while(j < rref.contents[0].length && rref.contents[i][j] == 0) {
+				for(int iCheck = i + 1; iCheck < contents.length; iCheck++)
+					if(rref.contents[iCheck][j] != 0) {
+						rref.swapRows(i, iCheck);
+						break;
+					}
+				if(rref.contents[i][j] == 0)
+					j++;
+			}
+			if(j == rref.contents[0].length)
+				break;
+			rref.divideRow(i, rref.contents[i][j]);
+			for(int iReduce = 0; iReduce < rref.contents.length; iReduce++)
+				if(iReduce != i)
+					rref.subtractRow(iReduce, rref.contents[iReduce][j], i);
+		}
+		
+		this.rref = rref;
+		return rref;
+	}
+	
+	/**
+	 * @return true if this Matrix is in reduced row echelon form, false otherwise
+	 */
+	public boolean isRref() {
+		return this.equals(this.rref());
+	}
+	
+	/**
+	 * Calculates the rank of this Matrix.
+	 * 
+	 * @return the rank
+	 */
+	public int rank() {
+		if(rank != -1)
+			return rank;
+		Matrix rref = rref();
+		int rank = 0, i = 0, j = 0;
+		while(i < rref.contents.length) {
+			while(j < rref.contents[0].length) {
+				if(rref.contents[i][j] == 1) {
+					rank++;
+					j++;
+					break;
+				}
+				j++;
+			}
+			i++;
+		}
+		
+		this.rank = rank;
+		return rank;
 	}
 	
 }
