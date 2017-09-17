@@ -73,19 +73,14 @@ public class Matrix implements Cloneable {
 	 */
 	@Override
 	public String toString() {
-		String lineBreak = "|\t";
-		for(int j = 0; j < contents[0].length; j++)
-			lineBreak += "\t";
-		lineBreak += "|\n";
-		
-		String result = lineBreak;
+		StringBuffer result = new StringBuffer((4 + 6 * contents[0].length) * contents.length);
 		for(double[] row : contents) {
-			result += "|\t";
-			for(double value : row)
-				result += (value == Math.rint(value) ? (int)value : value + "") + "\t";
-			result += "|\n" + lineBreak;
+			result.append("|");
+			for(double element : row)
+				result.append(String.format("%-6s", (Math.rint(element) == element ? String.format("% d", (int)element) : String.format("% .3f", element))));
+			result.append(" |\n");
 		}
-		return result;
+		return result.toString();
 	}
 	
 	/**
