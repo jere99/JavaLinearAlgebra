@@ -264,4 +264,22 @@ public class Matrix implements Cloneable {
 		return rank;
 	}
 	
+	/**
+	 * Calculates the sum of this Matrix and another Matrix.
+	 * 
+	 * @param m the Matrix to add
+	 * @return the sum of the two Matrices
+	 * @throws ArithmeticException if the matrices have different dimensions
+	 */
+	public Matrix add(Matrix m) {
+		if(this.contents.length != m.contents.length || this.contents[0].length != m.contents[0].length)
+			throw new ArithmeticException("Cannot add Matricies of different dimensions.");
+		
+		Matrix sum = this.clone();
+		for(int i = 0; i < sum.contents.length; i++)
+			for(int j = 0; j < sum.contents[0].length; j++)
+				sum.contents[i][j] += m.contents[i][j];
+		return sum;
+	}
+	
 }
