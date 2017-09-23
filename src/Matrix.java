@@ -93,7 +93,7 @@ public class Matrix implements Cloneable {
 		for(double[] row : contents) {
 			result.append("|");
 			for(double element : row)
-				result.append(String.format("%-6s", (Math.rint(element) == element ? String.format("% d", (int)element) : String.format("% .3f", element))));
+				result.append(String.format("%6s", (Math.rint(element) == element ? String.format("% d", (int)element) : String.format("% .3f", element))));
 			result.append(" |\n");
 		}
 		return result.toString();
