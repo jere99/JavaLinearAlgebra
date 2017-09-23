@@ -130,6 +130,67 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
+	 * Determines if this Matrix is a square matrix, that is if it has the same number of rows as it does columns.
+	 * 
+	 * @return true if this Matrix is square, false otherwise
+	 */
+	public boolean isSquare() {
+		return contents.length == contents[0].length;
+	}
+	
+	/**
+	 * Determines if this Matrix is diagonal, that is if all of its entries which are not on the main diagonal are zeros.
+	 * 
+	 * @return true if this Matrix is diagonal, false otherwise
+	 */
+	public boolean isDiagonal() {
+		for(int i = 0; i < contents.length; i++)
+			for(int j = 0; j < contents[0].length; j++)
+				if(i != j && contents[i][j] != 0)
+					return false;
+		return true;
+	}
+	
+	/**
+	 * Determines if this Matrix is upper triangular, that is if all of its entries which are below the main diagonal are zeros.
+	 * 
+	 * @return true if this Matrix is upper triangular, false otherwise
+	 */
+	public boolean isUpperTriangular() {
+		for(int i = 0; i < contents.length; i++)
+			for(int j = 0; j < i; j++)
+				if(contents[i][j] != 0)
+					return false;
+		return true;
+	}
+	
+	/**
+	 * Determines if this Matrix is lower triangular, that is if all of its entries which are above the main diagonal are zeros.
+	 * 
+	 * @return true if this Matrix is lower triangular, false otherwise
+	 */
+	public boolean isLowerTriangular() {
+		for(int i = 0; i < contents.length; i++)
+			for(int j = i + 1; j < contents[0].length; j++)
+				if(contents[i][j] != 0)
+					return false;
+		return true;
+	}
+	
+	/**
+	 * Determines if this Matrix is a zero matrix, that is if all of its entries are zeros.
+	 * 
+	 * @return true if this Matrix is a zero matrix, false otherwise
+	 */
+	public boolean isZero() {
+		for(int i = 0; i < contents.length; i++)
+			for(int j = 0; j < contents[0].length; j++)
+				if(contents[i][j] != 0)
+					return false;
+		return true;
+	}
+	
+	/**
 	 * Retrieves the all the values in one row of this Matrix.
 	 * 
 	 * @param i the index of the row to retrieve
