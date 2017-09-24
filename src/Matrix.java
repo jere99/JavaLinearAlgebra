@@ -141,6 +141,24 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
+	 * Creates a new Matrix object by augmenting this Matrix.
+	 * The augment is added as an additional column.
+	 * Intended to be used to turn a coefficient Matrix into an augmented Matrix.
+	 * 
+	 * @param augment the column vector to append to this Matrix
+	 * @return a Matrix which is an augmented form of this Matrix
+	 */
+	public Matrix augment(double[] augment) {
+		double[][] augmentedContents = new double[contents.length][contents[0].length + 1];
+		for(int i = 0; i < contents.length; i++) {
+			for(int j = 0; j < contents[0].length; j++)
+				augmentedContents[i][j] = contents[i][j];
+			augmentedContents[i][augmentedContents[0].length - 1] = augment[i];
+		}
+		return new Matrix(augmentedContents);
+	}
+	
+	/**
 	 * Retrieves the all the values in one row of this Matrix.
 	 * 
 	 * @param i the index of the row to retrieve
@@ -392,13 +410,7 @@ public class Matrix implements Cloneable {
 	 * @return the solution of the system if there is exactly one solution, null if there is no solution or infinitely many solutions
 	 */
 	public double[] findSolution(double[] augment) {
-		double[][] augmentedContents = new double[contents.length][contents[0].length + 1];
-		for(int i = 0; i < contents.length; i++) {
-			for(int j = 0; j < contents[0].length; j++)
-				augmentedContents[i][j] = contents[i][j];
-			augmentedContents[i][augmentedContents[0].length - 1] = augment[i];
-		}
-		return new Matrix(augmentedContents).findSolution();
+		return augment(augment).findSolution();
 	}
 	
 	/**
