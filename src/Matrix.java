@@ -405,8 +405,8 @@ public class Matrix implements Cloneable {
 	public double[] findSolution() {
 		if(rank(true) != contents[0].length - 1 || contents[0].length == 1) //call to rank forces generation of rref
 			return null;
-		for(int i = contents.length - 1; contents[i][contents[0].length - 2] == 0; i--)
-			if(contents[i][contents[0].length - 1] == 1)
+		for(int i = contents.length - 1; rref.contents[i][contents[0].length - 2] == 0; i--)
+			if(rref.contents[i][contents[0].length - 1] == 1)
 				return null;
 		double[] result = new double[contents.length];
 		for(int i = 0; i < result.length; i++)
