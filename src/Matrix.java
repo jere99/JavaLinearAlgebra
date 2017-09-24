@@ -329,6 +329,42 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
+	 * Assumes that this instance is an augmented matrix which represents a system of linear equations.
+	 * Calculates the solution for that system, if it exists.
+	 * 
+	 * @return the solution of the system if there is exactly one solution, null if there is no solution or infinitely many solutions
+	 */
+	public double[] findSolution() {
+		if(rank() != contents[0].length - 1 || contents[0].length == 1) //forces generation of rref
+			return null;
+		//handles rank()'s counting a one in the final column of an augment matrix as a leading one
+		for(int i = contents.length - 1; contents[i][contents[0].length - 2] == 0 && (contents[0].length == 2 || (contents[0].length  >= 3 && contents[i][contents[0].length - 3] == 0)); i--)
+			if(contents[i][contents[0].length - 1] == 1)
+				return null;
+		double[] result = new double[contents.length];
+		for(int i = 0; i < result.length; i++)
+			result[i] = rref.contents[i][contents[0].length - 1];
+		return result;
+	}
+	
+	/**
+	 * Assumes that this instance is a coefficient matrix which when augmented with the passed array represents a system of linear equations.
+	 * Calculates the solution for that system, if it exists.
+	 * 
+	 * @param augment the column to turn this coefficient matrix into an augmented matrix
+	 * @return the solution of the system if there is exactly one solution, null if there is no solution or infinitely many solutions
+	 */
+	public double[] findSolution(double[] augment) {
+		double[][] augmentedContents = new double[contents.length][contents[0].length + 1];
+		for(int i = 0; i < contents.length; i++) {
+			for(int j = 0; j < contents[0].length; j++)
+				augmentedContents[i][j] = contents[i][j];
+			augmentedContents[i][augmentedContents[0].length - 1] = augment[i];
+		}
+		return new Matrix(augmentedContents).findSolution();
+	}
+	
+	/**
 	 * Calculates the rank of this Matrix.
 	 * 
 	 * @return the rank
