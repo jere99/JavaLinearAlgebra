@@ -249,13 +249,30 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
+	 * Assumes that this instance is an augmented matrix which represents a system of linear equations.
+	 * Determines whether or not this system is consistent.
 	 * 
+	 * @return true if the system is consistent, false otherwise
 	 */
+	public boolean isConsistent() {
+		if(rank(true) == contents.length || contents[0].length == 1) //call to rank forces generation of rref
+			return true;
+		for(int i = contents.length - 1; rref.contents[i][contents[0].length - 2] == 0; i--)
+			if(rref.contents[i][contents[0].length - 1] == 1)
+				return false;
+		return true;
+	}
 	
 	/**
+	 * Assumes that this instance is a coefficient matrix which when augmented with the passed array represents a system of linear equations.
+	 * Determines whether or not this system is consistent.
 	 * 
+	 * @param augment the column to turn this coefficient matrix into an augmented matrix
+	 * @return true if the system is consistent, false otherwise
 	 */
-	
+	public boolean isConsistent(double[] augment) {
+		return augment(augment).isConsistent();
+	}
 	
 	//================================================================================
 	// Elementary Row Operations
