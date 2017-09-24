@@ -52,6 +52,8 @@ public class Matrix implements Cloneable {
 		Matrix result = new Matrix(copy);
 		if(this.rref != null)
 			result.rref = this.rref.clone();
+		if(this.rank != -1)
+			result.rank = this.rank;
 		return result;
 	}
 	
