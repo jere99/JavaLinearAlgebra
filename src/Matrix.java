@@ -359,16 +359,28 @@ public class Matrix implements Cloneable {
 	
 	/**
 	 * Calculates the rank of this Matrix.
+	 * Equivalent to calling {@code rank(false)}
 	 * 
 	 * @return the rank
 	 */
 	public int rank() {
-		if(rank != -1)
+		return rank(false);
+	}
+	
+	/**
+	 * Calculates the rank of this Matrix.
+	 * If this Matrix is flagged as being augmented, the last column will be ignored.
+	 * 
+	 * @param augmented true if this Matrix should be treated as an augmented matrix, false otherwise
+	 * @return the rank
+	 */
+	public int rank(boolean augmented) {
+		if(!augmented && rank != -1)
 			return rank;
 		Matrix rref = rref();
 		int rank = 0, i = 0, j = 0;
 		while(i < rref.contents.length) {
-			while(j < rref.contents[0].length) {
+			while(j < rref.contents[0].length - (augmented ? 1 : 0)) {
 				if(rref.contents[i][j] == 1) {
 					rank++;
 					j++;
@@ -379,7 +391,8 @@ public class Matrix implements Cloneable {
 			i++;
 		}
 		
-		this.rank = rank;
+		if(!augmented) //only cache rank if not flagged as augmented
+			this.rank = rank;
 		return rank;
 	}
 	
@@ -390,10 +403,9 @@ public class Matrix implements Cloneable {
 	 * @return the solution of the system if there is exactly one solution, null if there is no solution or infinitely many solutions
 	 */
 	public double[] findSolution() {
-		if(rank() != contents[0].length - 1 || contents[0].length == 1) //forces generation of rref
+		if(rank(true) != contents[0].length - 1 || contents[0].length == 1) //call to rank forces generation of rref
 			return null;
-		//handles rank()'s counting a one in the final column of an augment matrix as a leading one
-		for(int i = contents.length - 1; contents[i][contents[0].length - 2] == 0 && (contents[0].length == 2 || (contents[0].length  >= 3 && contents[i][contents[0].length - 3] == 0)); i--)
+		for(int i = contents.length - 1; contents[i][contents[0].length - 2] == 0; i--)
 			if(contents[i][contents[0].length - 1] == 1)
 				return null;
 		double[] result = new double[contents.length];
