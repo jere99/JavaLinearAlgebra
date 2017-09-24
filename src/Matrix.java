@@ -102,6 +102,15 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
+	 * Resets the cached rref and rank fields.
+	 * Should be called whenever the contents of this Matrix change by means of anything other than an elementary row operation.
+	 */
+	private void clearCache() {
+		rref = null;
+		rank = -1;
+	}
+	
+	/**
 	 * Sets a row in this Matrix.
 	 * 
 	 * @param i the index of the row to set
@@ -129,6 +138,35 @@ public class Matrix implements Cloneable {
 		double[][] old = contents;
 		contents = newContents;
 		return old;
+	}
+	
+	/**
+	 * Retrieves the all the values in one row of this Matrix.
+	 * 
+	 * @param i the index of the row to retrieve
+	 * @return an array of all the values in the specified row of this Matrix
+	 * @throws IllegalArgumentException if {@code i} is negative or exceeds the valid indices of rows in this Matrix
+	 */
+	public double[] getRowVector(int i) {
+		if(i < 0 || i >= contents.length)
+			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
+		return contents[i];
+	}
+	
+	/**
+	 * Retrieves the all the values in one column of this Matrix.
+	 * 
+	 * @param j the index of the column to retrieve
+	 * @return an array of all the values in the specified column of this Matrix
+	 * @throws IllegalArgumentException if {@code j} is negative or exceeds the valid indices of columns in this Matrix
+	 */
+	public double[] getColumnVector(int j) {
+		if(j < 0 || j >= contents[0].length)
+			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (contents[0].length - 1) + "].");
+		double[] column = new double[contents.length];
+		for(int i = 0; i < column.length; i++)
+			column[i] = contents[i][j];
+		return column;
 	}
 	
 	/**
@@ -193,42 +231,13 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Retrieves the all the values in one row of this Matrix.
 	 * 
-	 * @param i the index of the row to retrieve
-	 * @return an array of all the values in the specified row of this Matrix
-	 * @throws IllegalArgumentException if {@code i} is negative or exceeds the valid indices of rows in this Matrix
 	 */
-	public double[] getRowVector(int i) {
-		if(i < 0 || i >= contents.length)
-			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
-		return contents[i];
-	}
 	
 	/**
-	 * Retrieves the all the values in one column of this Matrix.
 	 * 
-	 * @param j the index of the column to retrieve
-	 * @return an array of all the values in the specified column of this Matrix
-	 * @throws IllegalArgumentException if {@code j} is negative or exceeds the valid indices of columns in this Matrix
 	 */
-	public double[] getColumnVector(int j) {
-		if(j < 0 || j >= contents[0].length)
-			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (contents[0].length - 1) + "].");
-		double[] column = new double[contents.length];
-		for(int i = 0; i < column.length; i++)
-			column[i] = contents[i][j];
-		return column;
-	}
 	
-	/**
-	 * Resets the cached rref and rank fields.
-	 * Should be called whenever the contents of this Matrix change by means of anything other than an elementary row operation.
-	 */
-	private void clearCache() {
-		rref = null;
-		rank = -1;
-	}
 	
 	//================================================================================
 	// Elementary Row Operations
@@ -331,6 +340,32 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
+	 * Calculates the rank of this Matrix.
+	 * 
+	 * @return the rank
+	 */
+	public int rank() {
+		if(rank != -1)
+			return rank;
+		Matrix rref = rref();
+		int rank = 0, i = 0, j = 0;
+		while(i < rref.contents.length) {
+			while(j < rref.contents[0].length) {
+				if(rref.contents[i][j] == 1) {
+					rank++;
+					j++;
+					break;
+				}
+				j++;
+			}
+			i++;
+		}
+		
+		this.rank = rank;
+		return rank;
+	}
+	
+	/**
 	 * Assumes that this instance is an augmented matrix which represents a system of linear equations.
 	 * Calculates the solution for that system, if it exists.
 	 * 
@@ -364,32 +399,6 @@ public class Matrix implements Cloneable {
 			augmentedContents[i][augmentedContents[0].length - 1] = augment[i];
 		}
 		return new Matrix(augmentedContents).findSolution();
-	}
-	
-	/**
-	 * Calculates the rank of this Matrix.
-	 * 
-	 * @return the rank
-	 */
-	public int rank() {
-		if(rank != -1)
-			return rank;
-		Matrix rref = rref();
-		int rank = 0, i = 0, j = 0;
-		while(i < rref.contents.length) {
-			while(j < rref.contents[0].length) {
-				if(rref.contents[i][j] == 1) {
-					rank++;
-					j++;
-					break;
-				}
-				j++;
-			}
-			i++;
-		}
-		
-		this.rank = rank;
-		return rank;
 	}
 	
 	/**
