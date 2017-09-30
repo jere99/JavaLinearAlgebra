@@ -197,34 +197,34 @@ public class Matrix implements Cloneable {
 	//================================================================================
 	
 	/**
-	 * Retrieves the all the values in one row of this Matrix.
+	 * Retrieves the the row vector of one of the rows in this Matrix.
 	 * 
 	 * @param i the index of the row to retrieve
-	 * @return an array of all the values in the specified row of this Matrix
+	 * @return the row vector of row {@code i} in this Matrix
 	 * @throws IllegalArgumentException if {@code i} is negative or exceeds the valid indices of rows in this Matrix
 	 */
-	public double[] getRowVector(int i) {
+	public Vector getRowVector(int i) {
 		if(i < 0 || i >= contents.length)
 			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
-		return contents[i];
 		
+		return new Vector(contents[i]);
 	}
 	
 	/**
-	 * Retrieves the all the values in one column of this Matrix.
+	 * Retrieves the the column vector of one of the column in this Matrix.
 	 * 
 	 * @param j the index of the column to retrieve
-	 * @return an array of all the values in the specified column of this Matrix
+	 * @return the column vector of column {@code j} in this Matrix
 	 * @throws IllegalArgumentException if {@code j} is negative or exceeds the valid indices of columns in this Matrix
 	 */
-	public double[] getColumnVector(int j) {
+	public Vector getColumnVector(int j) {
 		if(j < 0 || j >= contents[0].length)
 			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (contents[0].length - 1) + "].");
 		
 		double[] column = new double[contents.length];
 		for(int i = 0; i < column.length; i++)
 			column[i] = contents[i][j];
-		return column;
+		return new Vector(column);
 	}
 	
 	/**
@@ -612,30 +612,8 @@ public class Matrix implements Cloneable {
 		Matrix product = new Matrix(this.contents.length, m.contents[0].length);
 		for(int i = 0; i < product.contents.length; i++)
 			for(int j = 0; j < product.contents[0].length; j++)
-				product.contents[i][j] = dotProduct(this.contents[i], m.getColumnVector(j));
+				product.contents[i][j] = this.getRowVector(i).dotProduct(m.getColumnVector(j));
 		return product;
-	}
-	
-	//================================================================================
-	// Vector Operations
-	//================================================================================
-	
-	/**
-	 * Calculates the dot product of two vectors.
-	 * The two vectors must have the same number of components.
-	 * 
-	 * @param v the first vector
-	 * @param w the second vector
-	 * @return the dot product of the vectors
-	 * @throws ArithmeticException if the vectors have different numbers of components
-	 */
-	public static double dotProduct(double[] v, double[] w) {
-		if(v.length != w.length)
-			throw new ArithmeticException("The number of components in the two vectors must match to perform the dot product operation.");
-		double sum = 0;
-		for(int i = 0; i < v.length; i++)
-			sum += v[i] * w[i];
-		return sum;
 	}
 	
 }
