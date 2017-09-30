@@ -1,5 +1,7 @@
 import java.util.Arrays;
 
+import foundation.Matrix;
+
 public class Main {
 
 	public static void main(String[] args) {

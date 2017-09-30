@@ -1,3 +1,4 @@
+package foundation;
 
 /**
  * Defines a matrix and provides operations to perform on the matrix.
