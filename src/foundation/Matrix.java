@@ -122,6 +122,28 @@ public class Matrix implements Cloneable {
 	//================================================================================
 	
 	/**
+	 * Sets a value in this Matrix.
+	 * 
+	 * @param i the index of the row to set
+	 * @param j the index of the column to set
+	 * @param newValue the new value to set
+	 * @return the old value at the same indices
+	 * @throws IllegalArgumentException
+	 * 		if {@code i} is negative or exceeds the valid indices of rows in this Matrix
+	 * 		or {@code j} is negative or exceeds the valid indices of rows in this Matrix
+	 */
+	public double setValue(int i, int j, double newValue) {
+		if(i < 0 || i >= contents.length)
+			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
+		if(j < 0 || j >= contents[0].length)
+			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (contents[0].length - 1) + "].");
+		clearCache();
+		double old = contents[i][j];
+		contents[i][j] = newValue;
+		return old;
+	}
+	
+	/**
 	 * Sets a row in this Matrix.
 	 * 
 	 * @param i the index of the row to set
