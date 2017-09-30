@@ -45,8 +45,12 @@ public class Matrix implements Cloneable {
 	 * Initializes a Matrix with initial contents.
 	 * 
 	 * @param initialContents the initial contents for the Matrix.
+	 * @throws IllegalArgumentException if the rows of {@code initialContents} do not all have the same length
 	 */
 	public Matrix(double[][] initialContents) {
+		for(double[] row : initialContents)
+			if(row.length != initialContents[0].length)
+				throw new IllegalArgumentException("The parameter initialContents is invalid - all of its rows must have the same length.");
 		contents = initialContents;
 	}
 	
@@ -123,11 +127,15 @@ public class Matrix implements Cloneable {
 	 * @param i the index of the row to set
 	 * @param newRow the contents of the new row
 	 * @return the old row at the same index
-	 * @throws IllegalArgumentException if {@code i} is negative or exceeds the valid indices of rows in this Matrix
+	 * @throws IllegalArgumentException
+	 * 		if {@code i} is negative or exceeds the valid indices of rows in this Matrix
+	 * 		or the length of {@code newRow} is not the same as the length of the other rows in this Matrix
 	 */
 	public double[] setRow(int i, double[] newRow) {
 		if(i < 0 || i >= contents.length)
 			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
+		if(newRow.length != contents[0].length)
+			throw new IllegalArgumentException("The parameter newRow has an invalid length - it must be length: " + contents[0].length + ".");
 		clearCache();
 		double[] old = contents[i];
 		contents[i] = newRow;
@@ -139,8 +147,12 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param newContents the contents to set
 	 * @return the old contents
+	 * @throws IllegalArgumentException if the rows of {@code newContents} do not all have the same length
 	 */
 	public double[][] setContents(double[][] newContents) {
+		for(double[] row : newContents)
+			if(row.length != newContents[0].length)
+				throw new IllegalArgumentException("The parameter newContents is invalid - all of its rows must have the same length.");
 		clearCache();
 		double[][] old = contents;
 		contents = newContents;
