@@ -14,6 +14,7 @@ public class Matrix implements Cloneable {
 	
 	/**
 	 * Cached reduced row echelon form so it only needs to be calculated once.
+	 * If this Matrix is in reduced row echelon form, this field could be self-referential.
 	 */
 	private Matrix rref = null;
 	
@@ -51,10 +52,8 @@ public class Matrix implements Cloneable {
 			for(int j = 0; j < contents[0].length; j++)
 				copy[i][j] = contents[i][j];
 		Matrix result = new Matrix(copy);
-		if(this.rref != null)
-			result.rref = this.rref.clone();
-		if(this.rank != -1)
-			result.rank = this.rank;
+		result.rref = this.rref == null ? null : this.equals(this.rref) ? result : this.rref.clone();
+		result.rank = this.rank;
 		return result;
 	}
 	
@@ -342,29 +341,29 @@ public class Matrix implements Cloneable {
 	 * @return the reduced row echelon form
 	 */
 	public Matrix rref() {
-		if(rref != null)
-			return rref;
-		Matrix rref = this.clone();
-		
-		for(int i = 0, j = 0; i < rref.contents.length; i++) {
-			while(j < rref.contents[0].length && rref.contents[i][j] == 0) {
-				for(int iCheck = i + 1; iCheck < contents.length; iCheck++)
-					if(rref.contents[iCheck][j] != 0) {
-						rref.swapRows(i, iCheck);
-						break;
-					}
-				if(rref.contents[i][j] == 0)
-					j++;
+		if(rref == null) {
+			Matrix rref = this.clone();
+			
+			for(int i = 0, j = 0; i < rref.contents.length; i++) {
+				while(j < rref.contents[0].length && rref.contents[i][j] == 0) {
+					for(int iCheck = i + 1; iCheck < contents.length; iCheck++)
+						if(rref.contents[iCheck][j] != 0) {
+							rref.swapRows(i, iCheck);
+							break;
+						}
+					if(rref.contents[i][j] == 0)
+						j++;
+				}
+				if(j == rref.contents[0].length)
+					break;
+				rref.divideRow(i, rref.contents[i][j]);
+				for(int iReduce = 0; iReduce < rref.contents.length; iReduce++)
+					if(iReduce != i)
+						rref.subtractRow(iReduce, rref.contents[iReduce][j], i);
 			}
-			if(j == rref.contents[0].length)
-				break;
-			rref.divideRow(i, rref.contents[i][j]);
-			for(int iReduce = 0; iReduce < rref.contents.length; iReduce++)
-				if(iReduce != i)
-					rref.subtractRow(iReduce, rref.contents[iReduce][j], i);
+			
+			this.rref = rref.equals(this) ? this : rref;
 		}
-		
-		this.rref = rref;
 		return rref;
 	}
 	
