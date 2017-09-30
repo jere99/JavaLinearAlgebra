@@ -51,6 +51,7 @@ public class Matrix implements Cloneable {
 		for(double[] row : initialContents)
 			if(row.length != initialContents[0].length)
 				throw new IllegalArgumentException("The parameter initialContents is invalid - all of its rows must have the same length.");
+		
 		contents = initialContents;
 	}
 	
@@ -135,6 +136,7 @@ public class Matrix implements Cloneable {
 			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
 		if(j < 0 || j >= contents[0].length)
 			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (contents[0].length - 1) + "].");
+		
 		clearCache();
 		double old = contents[i][j];
 		contents[i][j] = newValue;
@@ -156,6 +158,7 @@ public class Matrix implements Cloneable {
 			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
 		if(newRow.length != contents[0].length)
 			throw new IllegalArgumentException("The parameter newRow has an invalid length - it must be length: " + contents[0].length + ".");
+		
 		clearCache();
 		double[] old = contents[i];
 		contents[i] = newRow;
@@ -173,6 +176,7 @@ public class Matrix implements Cloneable {
 		for(double[] row : newContents)
 			if(row.length != newContents[0].length)
 				throw new IllegalArgumentException("The parameter newContents is invalid - all of its rows must have the same length.");
+		
 		clearCache();
 		double[][] old = contents;
 		contents = newContents;
@@ -203,6 +207,7 @@ public class Matrix implements Cloneable {
 		if(i < 0 || i >= contents.length)
 			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
 		return contents[i];
+		
 	}
 	
 	/**
@@ -215,6 +220,7 @@ public class Matrix implements Cloneable {
 	public double[] getColumnVector(int j) {
 		if(j < 0 || j >= contents[0].length)
 			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (contents[0].length - 1) + "].");
+		
 		double[] column = new double[contents.length];
 		for(int i = 0; i < column.length; i++)
 			column[i] = contents[i][j];
@@ -222,8 +228,19 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Determines if this Matrix is a square matrix, that is if it has the same number of rows as it does columns.
+	 * Retrieves the contents of this Matrix.
 	 * 
+	 * @return the contents of this Matrix
+	 */
+	public double[][] getContents() {
+		return contents;
+	}
+	
+	/**
+	 * Determines if this Matrix is a square matrix, that is if:
+	 * <ul>
+	 * <li>it has the same number of rows as it does columns</li>
+	 * </ul>
 	 * @return true if this Matrix is square, false otherwise
 	 */
 	public boolean isSquare() {
@@ -231,11 +248,17 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Determines if this Matrix is diagonal, that is if all of its entries which are not on the main diagonal are zeros.
+	 * Determines if this Matrix is diagonal, that is if:
+	 * <ul>
+	 * <li>it is square</li>
+	 * <li>all of its entries which are not on the main diagonal are zeros</li>
+	 * </ul>
 	 * 
 	 * @return true if this Matrix is diagonal, false otherwise
 	 */
 	public boolean isDiagonal() {
+		if(contents.length != contents[0].length)
+			return false;
 		for(int i = 0; i < contents.length; i++)
 			for(int j = 0; j < contents[0].length; j++)
 				if(i != j && contents[i][j] != 0)
@@ -244,11 +267,17 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Determines if this Matrix is upper triangular, that is if all of its entries which are below the main diagonal are zeros.
+	 * Determines if this Matrix is upper triangular, that is if:
+	 * <ul>
+	 * <li>it is square</li>
+	 * <li>all of its entries which are below the main diagonal are zeros</li>
+	 * </ul>
 	 * 
 	 * @return true if this Matrix is upper triangular, false otherwise
 	 */
 	public boolean isUpperTriangular() {
+		if(contents.length != contents[0].length)
+			return false;
 		for(int i = 0; i < contents.length; i++)
 			for(int j = 0; j < i; j++)
 				if(contents[i][j] != 0)
@@ -257,14 +286,40 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Determines if this Matrix is lower triangular, that is if all of its entries which are above the main diagonal are zeros.
+	 * Determines if this Matrix is lower triangular, that is if:
+	 * <ul>
+	 * <li>it is square</li>
+	 * <li>all of its entries which are above the main diagonal are zeros</li>
+	 * </ul>
 	 * 
 	 * @return true if this Matrix is lower triangular, false otherwise
 	 */
 	public boolean isLowerTriangular() {
+		if(contents.length != contents[0].length)
+			return false;
 		for(int i = 0; i < contents.length; i++)
 			for(int j = i + 1; j < contents[0].length; j++)
 				if(contents[i][j] != 0)
+					return false;
+		return true;
+	}
+	
+	/**
+	 * Determines if this Matrix is an identity Matrix, that is if:
+	 * <ul>
+	 * <li>it is square</li>
+	 * <li>it is diagonal</li>
+	 * <li>all of its entries which are on the main diagonal are ones</li>
+	 * </ul>
+	 * 
+	 * @return true if this Matrix is diagonal, false otherwise
+	 */
+	public boolean isIndentityMatrix() {
+		if(contents.length != contents[0].length)
+			return false;
+		for(int i = 0; i < contents.length; i++)
+			for(int j = 0; j < contents[0].length; j++)
+				if(i != j && contents[i][j] != 0 || i == j && contents[i][j] != 1)
 					return false;
 		return true;
 	}
@@ -275,9 +330,9 @@ public class Matrix implements Cloneable {
 	 * @return true if this Matrix is a zero matrix, false otherwise
 	 */
 	public boolean isZero() {
-		for(int i = 0; i < contents.length; i++)
-			for(int j = 0; j < contents[0].length; j++)
-				if(contents[i][j] != 0)
+		for(double[] row : contents)
+			for(double element : row)
+				if(element != 0)
 					return false;
 		return true;
 	}
@@ -495,24 +550,6 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Calculates the sum of this Matrix and another Matrix.
-	 * 
-	 * @param m the Matrix to add
-	 * @return the sum of the two Matrices
-	 * @throws ArithmeticException if the matrices have different dimensions
-	 */
-	public Matrix add(Matrix m) {
-		if(this.contents.length != m.contents.length || this.contents[0].length != m.contents[0].length)
-			throw new ArithmeticException("Cannot add Matricies of different dimensions.");
-		
-		Matrix sum = this.clone();
-		for(int i = 0; i < sum.contents.length; i++)
-			for(int j = 0; j < sum.contents[0].length; j++)
-				sum.contents[i][j] += m.contents[i][j];
-		return sum;
-	}
-	
-	/**
 	 * Calculates the product of this Matrix and a scalar quantity.
 	 * 
 	 * @param scalar the scalar to multiply by
@@ -524,6 +561,37 @@ public class Matrix implements Cloneable {
 			for(int j = 0; j < product.contents[0].length; j++)
 				product.contents[i][j] *= scalar;
 		return product;
+	}
+	
+	/**
+	 * Calculates the sum of this Matrix and another Matrix.
+	 * The two Matrices must have the same dimensions.
+	 * 
+	 * @param m the Matrix to add
+	 * @return the sum of the two Matrices
+	 * @throws ArithmeticException if the Matrices have different dimensions
+	 */
+	public Matrix add(Matrix m) {
+		if(this.contents.length != m.contents.length || this.contents[0].length != m.contents[0].length)
+			throw new ArithmeticException("Cannot add or subtract Matricies of different dimensions.");
+		
+		Matrix sum = this.clone();
+		for(int i = 0; i < sum.contents.length; i++)
+			for(int j = 0; j < sum.contents[0].length; j++)
+				sum.contents[i][j] += m.contents[i][j];
+		return sum;
+	}
+	
+	/**
+	 * Calculates the difference of this Matrix and another Matrix.
+	 * The two Matrices must have the same dimensions.
+	 * 
+	 * @param m the Matrix to subtract
+	 * @return the difference of the two Matrices
+	 * @throws ArithmeticException if the Matrices have different dimensions
+	 */
+	public Matrix subtract(Matrix m) {
+		return this.add(m.scalarMultiply(-1));
 	}
 	
 	/**
