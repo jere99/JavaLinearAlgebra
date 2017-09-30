@@ -1,11 +1,15 @@
 package foundation;
 
 /**
- * Defines a matrix and provides operations to perform on the matrix.
+ * Defines a matrix and provides matrix operations.
  * 
  * @author JeremiahDeGreeff
  */
 public class Matrix implements Cloneable {
+	
+	//================================================================================
+	// Instance Variables
+	//================================================================================
 	
 	/**
 	 * The main contents of this n x m Matrix.
@@ -22,6 +26,10 @@ public class Matrix implements Cloneable {
 	 * Cached value for the rank of the Matrix so it only needs to be calculated once.
 	 */
 	private int rank = -1;
+	
+	//================================================================================
+	// Constructors
+	//================================================================================
 	
 	/**
 	 * Initializes an m x n Matrix without any initial contents.
@@ -41,6 +49,10 @@ public class Matrix implements Cloneable {
 	public Matrix(double[][] initialContents) {
 		contents = initialContents;
 	}
+	
+	//================================================================================
+	// Overrides
+	//================================================================================
 	
 	/**
 	 * Creates and returns a Matrix with identical contents.
@@ -101,14 +113,9 @@ public class Matrix implements Cloneable {
 		return result.toString();
 	}
 	
-	/**
-	 * Resets the cached rref and rank fields.
-	 * Should be called whenever the contents of this Matrix change by means of anything other than an elementary row operation.
-	 */
-	private void clearCache() {
-		rref = null;
-		rank = -1;
-	}
+	//================================================================================
+	// Mutator Methods
+	//================================================================================
 	
 	/**
 	 * Sets a row in this Matrix.
@@ -141,22 +148,17 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Creates a new Matrix object by augmenting this Matrix.
-	 * The augment is added as an additional column.
-	 * Intended to be used to turn a coefficient Matrix into an augmented Matrix.
-	 * 
-	 * @param augment the column vector to append to this Matrix
-	 * @return a Matrix which is an augmented form of this Matrix
+	 * Resets the cached rref and rank fields.
+	 * Should be called whenever the contents of this Matrix change by means of anything other than an elementary row operation.
 	 */
-	public Matrix augment(double[] augment) {
-		double[][] augmentedContents = new double[contents.length][contents[0].length + 1];
-		for(int i = 0; i < contents.length; i++) {
-			for(int j = 0; j < contents[0].length; j++)
-				augmentedContents[i][j] = contents[i][j];
-			augmentedContents[i][augmentedContents[0].length - 1] = augment[i];
-		}
-		return new Matrix(augmentedContents);
+	private void clearCache() {
+		rref = null;
+		rank = -1;
 	}
+	
+	//================================================================================
+	// Accessor Methods
+	//================================================================================
 	
 	/**
 	 * Retrieves the all the values in one row of this Matrix.
@@ -334,6 +336,24 @@ public class Matrix implements Cloneable {
 	//================================================================================
 	// Matrix Operations
 	//================================================================================
+	
+	/**
+	 * Creates a new Matrix object by augmenting this Matrix.
+	 * The augment is added as an additional column.
+	 * Intended to be used to turn a coefficient Matrix into an augmented Matrix.
+	 * 
+	 * @param augment the column vector to append to this Matrix
+	 * @return a Matrix which is an augmented form of this Matrix
+	 */
+	public Matrix augment(double[] augment) {
+		double[][] augmentedContents = new double[contents.length][contents[0].length + 1];
+		for(int i = 0; i < contents.length; i++) {
+			for(int j = 0; j < contents[0].length; j++)
+				augmentedContents[i][j] = contents[i][j];
+			augmentedContents[i][augmentedContents[0].length - 1] = augment[i];
+		}
+		return new Matrix(augmentedContents);
+	}
 	
 	/**
 	 * Uses Gauss-Jordan elimination to determine the reduced row echelon form of this Matrix.
