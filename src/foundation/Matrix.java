@@ -44,7 +44,7 @@ public class Matrix implements Cloneable {
 	/**
 	 * Initializes a Matrix with initial contents.
 	 * 
-	 * @param initialContents the initial contents for the Matrix.
+	 * @param initialContents the initial contents for the Matrix
 	 * @throws IllegalArgumentException if the rows of {@code initialContents} do not all have the same length
 	 */
 	public Matrix(double[][] initialContents) {
@@ -80,7 +80,7 @@ public class Matrix implements Cloneable {
 	 * The other object is considered "equal" if either:
 	 * <ul>
 	 * <li>The other object references this instance. In other words {@code this == obj} has the value {@code true}.</li>
-	 * <li>The other object has contents identical to those of this instance.</li>
+	 * <li>The other object is a {@code Matrix} and has contents identical to those of this instance.</li>
 	 * </ul>
 	 * </p>
 	 */
@@ -101,9 +101,7 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Returns a string representation of the Matrix.
-	 * 
-	 * @return  a string representation of the Matrix.
+	 * Generates a string representation of the Matrix.
 	 */
 	@Override
 	public String toString() {
@@ -285,6 +283,13 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
+	 * @return true if this Matrix is in reduced row echelon form, false otherwise
+	 */
+	public boolean isRref() {
+		return this.equals(this.rref());
+	}
+	
+	/**
 	 * Assumes that this instance is an augmented matrix which represents a system of linear equations.
 	 * Determines whether or not this system is consistent.
 	 * 
@@ -419,13 +424,6 @@ public class Matrix implements Cloneable {
 			this.rref = rref.equals(this) ? this : rref;
 		}
 		return rref;
-	}
-	
-	/**
-	 * @return true if this Matrix is in reduced row echelon form, false otherwise
-	 */
-	public boolean isRref() {
-		return this.equals(this.rref());
 	}
 	
 	/**
