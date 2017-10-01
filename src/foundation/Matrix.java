@@ -584,6 +584,8 @@ public class Matrix implements Cloneable {
 	
 	/**
 	 * Calculates the result of multiplying this Matrix by another Matrix.
+	 * The number of columns in this Matrix must match the number of rows in the other Matrix.
+	 * The resulting Matrix will have dimensions n x m, with n being the number of rows in this Matrix and m being the number of columns in the other Matrix.
 	 * Note that this function is not commutative; in other words for Matrices m1 and m2
 	 * <blockquote>
 	 * m1.matrixMultiply(m2).equals(m2.matrixMultiply(m1))
@@ -592,6 +594,7 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param m the Matrix to multiply by
 	 * @return the product of the Matrices
+	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of rows in {@code m}
 	 */
 	public Matrix matrixMultiply(Matrix m) {
 		if(this.contents[0].length != m.contents.length)

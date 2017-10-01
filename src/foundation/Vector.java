@@ -88,7 +88,7 @@ public class Vector {
 		StringBuffer result = new StringBuffer(components.length * 8); //allocates just under 6 characters per value
 		result.append('<');
 		for(int i = 0; i < components.length; i++)
-			result.append((Math.rint(components[i]) == components[i] ? String.format("%d", (int)components[i]) : String.format("%.3f", components[i])) + (i == components.length - 1 ? ">" : ", "));
+			result.append((Math.rint(components[i]) == components[i] ? String.format("%d", (int)components[i]) : String.format("%.3f", components[i])) + (i == components.length - 1 ? ">\n" : ", "));
 		return result.toString();
 	}
 	
@@ -256,7 +256,7 @@ public class Vector {
 	 * 
 	 * @param v the Vector to perform the dot product with
 	 * @return the dot product of the two Vectors
-	 * @throws ArithmeticException if the Vectors have different numbers of components
+	 * @throws ArithmeticException if the Vectors are in different spaces
 	 */
 	public double dotProduct(Vector v) {
 		if(this.components.length != v.components.length)
