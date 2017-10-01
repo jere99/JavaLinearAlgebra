@@ -155,24 +155,49 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Sets a row in this Matrix.
+	 * Sets a row Vector in this Matrix.
 	 * 
 	 * @param i the index of the row to set
-	 * @param newRow the contents of the new row
+	 * @param newRow the new row vector
 	 * @return the old row at the same index
 	 * @throws IllegalArgumentException
 	 * 		if {@code i} is negative or exceeds the valid indices of rows in this Matrix
-	 * 		or the length of {@code newRow} is not the same as the length of the other rows in this Matrix
+	 * 		or the number of components in {@code newRow} is not the same as the length of the rows in this Matrix
 	 */
-	public double[] setRow(int i, double[] newRow) {
+	public double[] setRowVector(int i, Vector newRow) {
 		if(i < 0 || i >= rowCount())
 			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (rowCount() - 1) + "].");
-		if(newRow.length != columnCount())
+		if(newRow.componentCount() != columnCount())
 			throw new IllegalArgumentException("The parameter newRow has an invalid length - it must be length: " + columnCount() + ".");
 		
 		clearCache();
 		double[] old = contents[i];
-		contents[i] = newRow;
+		contents[i] = newRow.getComponents();
+		return old;
+	}
+	
+	/**
+	 * Sets a column Vector in this Matrix.
+	 * 
+	 * @param j the index of the column to set
+	 * @param newColumn the new column Vector
+	 * @return the old column at the same index
+	 * @throws IllegalArgumentException
+	 * 		if {@code j} is negative or exceeds the valid indices of columns in this Matrix
+	 * 		or the number of components in {@code newColumn} is not the same as the length of the columns in this Matrix
+	 */
+	public double[] setColumnVector(int j, Vector newColumn) {
+		if(j < 0 || j >= columnCount())
+			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (columnCount() - 1) + "].");
+		if(newColumn.componentCount() != rowCount())
+			throw new IllegalArgumentException("The parameter newColumn has an invalid length - it must be length: " + rowCount() + ".");
+		
+		clearCache();
+		double[] old = new double[rowCount()];
+		for(int i = 0; i < rowCount(); i++) {
+			old[i] = contents[i][j];
+			contents[i][j] = newColumn.getComponent(i);
+		}
 		return old;
 	}
 	
@@ -461,20 +486,6 @@ public class Matrix implements Cloneable {
 	//================================================================================
 	
 	/**
-	 * Calculates the product of this Matrix and a scalar quantity.
-	 * 
-	 * @param scalar the scalar to multiply by
-	 * @return the product of the Matrix and the scalar
-	 */
-	public Matrix scalarMultiply(double scalar) {
-		Matrix product = this.clone();
-		for(int i = 0; i < product.rowCount(); i++)
-			for(int j = 0; j < product.columnCount(); j++)
-				product.contents[i][j] *= scalar;
-		return product;
-	}
-	
-	/**
 	 * Calculates the sum of this Matrix and another Matrix.
 	 * The two Matrices must have the same dimensions.
 	 * 
@@ -502,7 +513,41 @@ public class Matrix implements Cloneable {
 	 * @throws ArithmeticException if the Matrices have different dimensions
 	 */
 	public Matrix subtract(Matrix m) {
-		return this.add(m.scalarMultiply(-1));
+		return this.add(m.multiply(-1));
+	}
+	
+	/**
+	 * Calculates the product of this Matrix and a scalar quantity.
+	 * 
+	 * @param scalar the scalar to multiply by
+	 * @return the product of the Matrix and the scalar
+	 */
+	public Matrix multiply(double scalar) {
+		Matrix product = this.clone();
+		for(int i = 0; i < product.rowCount(); i++)
+			for(int j = 0; j < product.columnCount(); j++)
+				product.contents[i][j] *= scalar;
+		return product;
+	}
+	
+	/**
+	 * Calculates the result of multiplying this Matrix by a Vector.
+	 * This is equivalent to multiplying this Matrix by another Matrix which has only one column.
+	 * The number of columns in this Matrix must match the number of components in the Vector.
+	 * The resulting Matrix will have dimensions n x 1, with n being the number of rows in this Matrix.
+	 * 
+	 * @param v the Vector to multiply by
+	 * @return the product of this Matrix and the {@code v}
+	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of components in {@code v}
+	 */
+	public Vector multiply(Vector v) {
+		if(this.columnCount() != v.componentCount())
+			throw new ArithmeticException("The number of columns in this Matrix must match the number of components in {@code v} to multiply them.");
+		
+		Vector product = new Vector(this.rowCount());
+		for(int i = 0; i < product.componentCount(); i++)
+			product.setComponent(i, this.getRowVector(i).dotProduct(v));
+		return product;
 	}
 	
 	/**
@@ -519,29 +564,14 @@ public class Matrix implements Cloneable {
 	 * @return the product of the Matrices
 	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of rows in {@code m}
 	 */
-	public Matrix matrixMultiply(Matrix m) {
+	public Matrix multiply(Matrix m) {
 		if(this.columnCount() != m.rowCount())
 			throw new ArithmeticException("The number of columns in the first Matrix must match the number of rows in the second to multiply them.");
 		
 		Matrix product = new Matrix(this.rowCount(), m.columnCount());
-		for(int i = 0; i < product.rowCount(); i++)
-			for(int j = 0; j < product.columnCount(); j++)
-				product.contents[i][j] = this.getRowVector(i).dotProduct(m.getColumnVector(j));
+		for(int j = 0; j < product.columnCount(); j++)
+			product.setColumnVector(j, this.multiply(m.getColumnVector(j)));
 		return product;
-	}
-	
-	/**
-	 * Calculates the result of multiplying this Matrix by a Vector.
-	 * This is equivalent to multiplying this Matrix by another Matrix which has only one column.
-	 * The number of columns in this Matrix must match the number of components in the Vector.
-	 * The resulting Matrix will have dimensions n x 1, with n being the number of rows in this Matrix.
-	 * 
-	 * @param v the Vector to multiply by
-	 * @return the product of this Matrix and the {@code v}
-	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of components in {@code v}
-	 */
-	public Matrix matrixMultiply(Vector v) {
-		return matrixMultiply(new Matrix(new Vector[] {v}));
 	}
 	
 	/**

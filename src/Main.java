@@ -3,14 +3,14 @@ import foundation.*;
 public class Main {
 
 	public static void main(String[] args) {
-		Vector v = new Vector(new double[] {0,0,0});
-		System.out.println(v);
+		Matrix a = new Matrix(new double[][]{{6,7},{8,9}});
+		Matrix b = new Matrix(new double[][]{{1,2},{3,5}});
 		
-		System.out.println(v.isLinearCombination(new Vector[] {
-				new Vector(new double[] {1,4,7}),
-				new Vector(new double[] {2,5,8}),
-				new Vector(new double[] {3,6,9})
-		}));
+		System.out.println(a);
+		System.out.println(b);
+		
+		System.out.println(a.multiply(b));
+		System.out.println(b.multiply(a));
 	}
 
 }
