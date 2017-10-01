@@ -1,15 +1,16 @@
-import foundation.Matrix;
-import foundation.Vector;
+import foundation.*;
 
 public class Main {
 
 	public static void main(String[] args) {
-		Matrix m = new Matrix(new double[][] {{2,8,4},{2,5,1},{4,10,-1}});
-		Vector v = new Vector(new double[] {3,7,1});
-		System.out.println(m);
+		Vector v = new Vector(new double[] {0,0,0});
 		System.out.println(v);
-		System.out.println(m.matrixMultiply(v));
-		System.out.println(v.getLength());
+		
+		System.out.println(v.isLinearCombination(new Vector[] {
+				new Vector(new double[] {1,4,7}),
+				new Vector(new double[] {2,5,8}),
+				new Vector(new double[] {3,6,9})
+		}));
 	}
 
 }

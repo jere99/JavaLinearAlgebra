@@ -51,14 +51,20 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Initializes a Matrix with a single column Vector.
+	 * Initializes a Matrix from its column vectors.
 	 * 
-	 * @param v the Vector whose components will form the initial contents of the Matrix
+	 * @param columns the Vectors which will form the columns of the initial contents of the Matrix
+	 * @throws IllegalArgumentException if the Vectors in {@code vectors} are not all in the same space
 	 */
-	public Matrix(Vector v) {
-		contents = new double[v.componentCount()][1];
-		for(int i = 0; i < contents.length; i++)
-			contents[i][0] = v.getComponent(i);
+	public Matrix(Vector[] columns) {
+		for(Vector v : columns)
+			if(v.componentCount() != columns[0].componentCount())
+				throw new IllegalArgumentException("The parameter columns is invalid - all of its Vectors must be in the same space.");
+		
+		contents = new double[columns[0].componentCount()][columns.length];
+		for(int i = 0; i < rowCount(); i++)
+			for(int j = 0; j < columnCount(); j++)
+				contents[i][j] = columns[j].getComponent(i);
 	}
 	
 	//================================================================================
@@ -382,13 +388,14 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Assumes that this instance is a coefficient matrix which when augmented with the passed array represents a system of linear equations.
+	 * Assumes that this instance is a coefficient matrix which when augmented with the passed column Vector represents a system of linear equations.
 	 * Determines whether or not this system is consistent.
 	 * 
-	 * @param augment the column to turn this coefficient matrix into an augmented matrix
+	 * @param augment the column Vector to turn this coefficient matrix into an augmented matrix
 	 * @return true if the system is consistent, false otherwise
+	 * @throws IllegalArgumentException if the number of components of {@code augment} does not equal the number or rows in this Matrix
 	 */
-	public boolean isConsistent(double[] augment) {
+	public boolean isConsistent(Vector augment) {
 		return augment(augment).isConsistent();
 	}
 	
@@ -454,19 +461,106 @@ public class Matrix implements Cloneable {
 	//================================================================================
 	
 	/**
+	 * Calculates the product of this Matrix and a scalar quantity.
+	 * 
+	 * @param scalar the scalar to multiply by
+	 * @return the product of the Matrix and the scalar
+	 */
+	public Matrix scalarMultiply(double scalar) {
+		Matrix product = this.clone();
+		for(int i = 0; i < product.rowCount(); i++)
+			for(int j = 0; j < product.columnCount(); j++)
+				product.contents[i][j] *= scalar;
+		return product;
+	}
+	
+	/**
+	 * Calculates the sum of this Matrix and another Matrix.
+	 * The two Matrices must have the same dimensions.
+	 * 
+	 * @param m the Matrix to add
+	 * @return the sum of the two Matrices
+	 * @throws ArithmeticException if the Matrices have different dimensions
+	 */
+	public Matrix add(Matrix m) {
+		if(this.rowCount() != m.rowCount() || this.columnCount() != m.columnCount())
+			throw new ArithmeticException("Cannot add or subtract Matricies of different dimensions.");
+		
+		Matrix sum = this.clone();
+		for(int i = 0; i < sum.rowCount(); i++)
+			for(int j = 0; j < sum.columnCount(); j++)
+				sum.contents[i][j] += m.contents[i][j];
+		return sum;
+	}
+	
+	/**
+	 * Calculates the difference of this Matrix and another Matrix.
+	 * The two Matrices must have the same dimensions.
+	 * 
+	 * @param m the Matrix to subtract
+	 * @return the difference of the two Matrices
+	 * @throws ArithmeticException if the Matrices have different dimensions
+	 */
+	public Matrix subtract(Matrix m) {
+		return this.add(m.scalarMultiply(-1));
+	}
+	
+	/**
+	 * Calculates the result of multiplying this Matrix by another Matrix.
+	 * The number of columns in this Matrix must match the number of rows in the other Matrix.
+	 * The resulting Matrix will have dimensions n x m, with n being the number of rows in this Matrix and m being the number of columns in the other Matrix.
+	 * Note that this function is not commutative; in other words for Matrices m1 and m2
+	 * <blockquote>
+	 * m1.matrixMultiply(m2).equals(m2.matrixMultiply(m1))
+	 * </blockquote>
+	 * will not necessarily have a value of true.
+	 * 
+	 * @param m the Matrix to multiply by
+	 * @return the product of the Matrices
+	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of rows in {@code m}
+	 */
+	public Matrix matrixMultiply(Matrix m) {
+		if(this.columnCount() != m.rowCount())
+			throw new ArithmeticException("The number of columns in the first Matrix must match the number of rows in the second to multiply them.");
+		
+		Matrix product = new Matrix(this.rowCount(), m.columnCount());
+		for(int i = 0; i < product.rowCount(); i++)
+			for(int j = 0; j < product.columnCount(); j++)
+				product.contents[i][j] = this.getRowVector(i).dotProduct(m.getColumnVector(j));
+		return product;
+	}
+	
+	/**
+	 * Calculates the result of multiplying this Matrix by a Vector.
+	 * This is equivalent to multiplying this Matrix by another Matrix which has only one column.
+	 * The number of columns in this Matrix must match the number of components in the Vector.
+	 * The resulting Matrix will have dimensions n x 1, with n being the number of rows in this Matrix.
+	 * 
+	 * @param v the Vector to multiply by
+	 * @return the product of this Matrix and the {@code v}
+	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of components in {@code v}
+	 */
+	public Matrix matrixMultiply(Vector v) {
+		return matrixMultiply(new Matrix(new Vector[] {v}));
+	}
+	
+	/**
 	 * Creates a new Matrix object by augmenting this Matrix.
-	 * The augment is added as an additional column.
+	 * The augment is added as an additional column Vector.
 	 * Intended to be used to turn a coefficient Matrix into an augmented Matrix.
 	 * 
-	 * @param augment the column vector to append to this Matrix
+	 * @param augment the column Vector to append to this Matrix
 	 * @return a Matrix which is an augmented form of this Matrix
+	 * @throws IllegalArgumentException if the number of components of {@code augment} does not equal the number or rows in this Matrix
 	 */
-	public Matrix augment(double[] augment) {
+	public Matrix augment(Vector augment) {
+		if(this.rowCount() != augment.componentCount())
+			throw new IllegalArgumentException("Can only augment a Matrix with a column Vector with which has the same number of components as the Matrix does rows.");
 		double[][] augmentedContents = new double[rowCount()][columnCount() + 1];
 		for(int i = 0; i < rowCount(); i++) {
 			for(int j = 0; j < columnCount(); j++)
 				augmentedContents[i][j] = contents[i][j];
-			augmentedContents[i][augmentedContents[0].length - 1] = augment[i];
+			augmentedContents[i][columnCount()] = augment.getComponent(i);
 		}
 		return new Matrix(augmentedContents);
 	}
@@ -556,98 +650,15 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Assumes that this instance is a coefficient matrix which when augmented with the passed array represents a system of linear equations.
+	 * Assumes that this instance is a coefficient matrix which when augmented with the passed column Vector represents a system of linear equations.
 	 * Calculates the solution for that system, if it exists.
 	 * 
-	 * @param augment the column to turn this coefficient matrix into an augmented matrix
+	 * @param augment the column Vector to turn this coefficient matrix into an augmented matrix
 	 * @return the solution of the system if there is exactly one solution, null if there is no solution or infinitely many solutions
+	 * @throws IllegalArgumentException if the number of components of {@code augment} does not equal the number or rows in this Matrix
 	 */
-	public double[] findSolution(double[] augment) {
+	public double[] findSolution(Vector augment) {
 		return augment(augment).findSolution();
-	}
-	
-	/**
-	 * Calculates the product of this Matrix and a scalar quantity.
-	 * 
-	 * @param scalar the scalar to multiply by
-	 * @return the product of the Matrix and the scalar
-	 */
-	public Matrix scalarMultiply(double scalar) {
-		Matrix product = this.clone();
-		for(int i = 0; i < product.rowCount(); i++)
-			for(int j = 0; j < product.columnCount(); j++)
-				product.contents[i][j] *= scalar;
-		return product;
-	}
-	
-	/**
-	 * Calculates the sum of this Matrix and another Matrix.
-	 * The two Matrices must have the same dimensions.
-	 * 
-	 * @param m the Matrix to add
-	 * @return the sum of the two Matrices
-	 * @throws ArithmeticException if the Matrices have different dimensions
-	 */
-	public Matrix add(Matrix m) {
-		if(this.rowCount() != m.rowCount() || this.columnCount() != m.columnCount())
-			throw new ArithmeticException("Cannot add or subtract Matricies of different dimensions.");
-		
-		Matrix sum = this.clone();
-		for(int i = 0; i < sum.rowCount(); i++)
-			for(int j = 0; j < sum.columnCount(); j++)
-				sum.contents[i][j] += m.contents[i][j];
-		return sum;
-	}
-	
-	/**
-	 * Calculates the difference of this Matrix and another Matrix.
-	 * The two Matrices must have the same dimensions.
-	 * 
-	 * @param m the Matrix to subtract
-	 * @return the difference of the two Matrices
-	 * @throws ArithmeticException if the Matrices have different dimensions
-	 */
-	public Matrix subtract(Matrix m) {
-		return this.add(m.scalarMultiply(-1));
-	}
-	
-	/**
-	 * Calculates the result of multiplying this Matrix by another Matrix.
-	 * The number of columns in this Matrix must match the number of rows in the other Matrix.
-	 * The resulting Matrix will have dimensions n x m, with n being the number of rows in this Matrix and m being the number of columns in the other Matrix.
-	 * Note that this function is not commutative; in other words for Matrices m1 and m2
-	 * <blockquote>
-	 * m1.matrixMultiply(m2).equals(m2.matrixMultiply(m1))
-	 * </blockquote>
-	 * will not necessarily have a value of true.
-	 * 
-	 * @param m the Matrix to multiply by
-	 * @return the product of the Matrices
-	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of rows in {@code m}
-	 */
-	public Matrix matrixMultiply(Matrix m) {
-		if(this.columnCount() != m.rowCount())
-			throw new ArithmeticException("The number of columns in the first Matrix must match the number of rows in the second to multiply them.");
-		
-		Matrix product = new Matrix(this.rowCount(), m.columnCount());
-		for(int i = 0; i < product.rowCount(); i++)
-			for(int j = 0; j < product.columnCount(); j++)
-				product.contents[i][j] = this.getRowVector(i).dotProduct(m.getColumnVector(j));
-		return product;
-	}
-	
-	/**
-	 * Calculates the result of multiplying this Matrix by a Vector.
-	 * This is equivalent to multiplying this Matrix by another Matrix which has only one column.
-	 * The number of columns in this Matrix must match the number of components in the Vector.
-	 * The resulting Matrix will have dimensions n x 1, with n being the number of rows in this Matrix.
-	 * 
-	 * @param v the Vector to multiply by
-	 * @return the product of this Matrix and the {@code v}
-	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of components in {@code v}
-	 */
-	public Matrix matrixMultiply(Vector v) {
-		return matrixMultiply(new Matrix(v));
 	}
 	
 }

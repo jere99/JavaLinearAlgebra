@@ -212,6 +212,17 @@ public class Vector {
 		return this.dotProduct(v) == 0;
 	}
 	
+	/**
+	 * Determines whether or not this Vector is a linear combination of an array of Vectors,
+	 * that is if this Vector could be represented as the sum of scalar multiples of each of the provided Vectors.
+	 * 
+	 * @param vectors the Vectors to test
+	 * @return true if this Vector is a linear combination of {@code vectors}, false otherwise
+	 */
+	public boolean isLinearCombination(Vector[] vectors) {
+		return new Matrix(vectors).isConsistent(this);
+	}
+	
 	//================================================================================
 	// Vector Operations
 	//================================================================================
