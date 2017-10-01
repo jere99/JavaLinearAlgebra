@@ -50,6 +50,17 @@ public class Matrix implements Cloneable {
 		contents = initialContents;
 	}
 	
+	/**
+	 * Initializes a Matrix with a single column Vector.
+	 * 
+	 * @param v the Vector whose components will form the initial contents of the Matrix
+	 */
+	public Matrix(Vector v) {
+		contents = new double[v.componentCount()][1];
+		for(int i = 0; i < contents.length; i++)
+			contents[i][0] = v.getComponent(i);
+	}
+	
 	//================================================================================
 	// Overrides
 	//================================================================================
@@ -59,9 +70,9 @@ public class Matrix implements Cloneable {
 	 */
 	@Override
 	public Matrix clone() {
-		double[][] copy = new double[contents.length][contents[0].length];
-		for(int i = 0; i < contents.length; i++)
-			for(int j = 0; j < contents[0].length; j++)
+		double[][] copy = new double[rowCount()][columnCount()];
+		for(int i = 0; i < rowCount(); i++)
+			for(int j = 0; j < columnCount(); j++)
 				copy[i][j] = contents[i][j];
 		Matrix result = new Matrix(copy);
 		result.rref = this.rref == null ? null : this.equals(this.rref) ? result : this.rref.clone();
@@ -86,10 +97,10 @@ public class Matrix implements Cloneable {
 		if(!(obj instanceof Matrix))
 			return false;
 		Matrix matrix = (Matrix) obj;
-		if(this.contents.length != matrix.contents.length || this.contents[0].length != matrix.contents[0].length)
+		if(this.rowCount() != matrix.rowCount() || this.columnCount() != matrix.columnCount())
 			return false;
-		for(int i = 0; i < contents.length; i++)
-			for(int j = 0; j < contents[0].length; j++)
+		for(int i = 0; i < rowCount(); i++)
+			for(int j = 0; j < columnCount(); j++)
 				if(this.contents[i][j] != matrix.contents[i][j])
 					return false;
 		return true;
@@ -100,7 +111,7 @@ public class Matrix implements Cloneable {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer result = new StringBuffer((4 + 6 * contents[0].length) * contents.length);
+		StringBuffer result = new StringBuffer((4 + 6 * columnCount()) * rowCount());
 		for(double[] row : contents) {
 			result.append("|");
 			for(double element : row)
@@ -126,10 +137,10 @@ public class Matrix implements Cloneable {
 	 * 		or {@code j} is negative or exceeds the valid indices of rows in this Matrix
 	 */
 	public double setValue(int i, int j, double newValue) {
-		if(i < 0 || i >= contents.length)
-			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
-		if(j < 0 || j >= contents[0].length)
-			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (contents[0].length - 1) + "].");
+		if(i < 0 || i >= rowCount())
+			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (rowCount() - 1) + "].");
+		if(j < 0 || j >= columnCount())
+			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (columnCount() - 1) + "].");
 		
 		clearCache();
 		double old = contents[i][j];
@@ -148,10 +159,10 @@ public class Matrix implements Cloneable {
 	 * 		or the length of {@code newRow} is not the same as the length of the other rows in this Matrix
 	 */
 	public double[] setRow(int i, double[] newRow) {
-		if(i < 0 || i >= contents.length)
-			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
-		if(newRow.length != contents[0].length)
-			throw new IllegalArgumentException("The parameter newRow has an invalid length - it must be length: " + contents[0].length + ".");
+		if(i < 0 || i >= rowCount())
+			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (rowCount() - 1) + "].");
+		if(newRow.length != columnCount())
+			throw new IllegalArgumentException("The parameter newRow has an invalid length - it must be length: " + columnCount() + ".");
 		
 		clearCache();
 		double[] old = contents[i];
@@ -197,8 +208,8 @@ public class Matrix implements Cloneable {
 	 * @throws IllegalArgumentException if {@code i} is negative or exceeds the valid indices of rows in this Matrix
 	 */
 	public Vector getRowVector(int i) {
-		if(i < 0 || i >= contents.length)
-			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
+		if(i < 0 || i >= rowCount())
+			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (rowCount() - 1) + "].");
 		
 		return new Vector(contents[i]);
 	}
@@ -211,10 +222,10 @@ public class Matrix implements Cloneable {
 	 * @throws IllegalArgumentException if {@code j} is negative or exceeds the valid indices of columns in this Matrix
 	 */
 	public Vector getColumnVector(int j) {
-		if(j < 0 || j >= contents[0].length)
-			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (contents[0].length - 1) + "].");
+		if(j < 0 || j >= columnCount())
+			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (columnCount() - 1) + "].");
 		
-		double[] column = new double[contents.length];
+		double[] column = new double[rowCount()];
 		for(int i = 0; i < column.length; i++)
 			column[i] = contents[i][j];
 		return new Vector(column);
@@ -230,6 +241,24 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
+	 * Retrieves the number of rows in this Matrix.
+	 * 
+	 * @return the number of rows in this Matrix
+	 */
+	public int rowCount() {
+		return contents.length;
+	}
+	
+	/**
+	 * Retrieves the number of columns in this Matrix.
+	 * 
+	 * @return the number of columns in this Matrix
+	 */
+	public int columnCount() {
+		return contents[0].length;
+	}
+	
+	/**
 	 * Determines if this Matrix is a square matrix, that is if:
 	 * <ul>
 	 * <li>it has the same number of rows as it does columns</li>
@@ -237,7 +266,7 @@ public class Matrix implements Cloneable {
 	 * @return true if this Matrix is square, false otherwise
 	 */
 	public boolean isSquare() {
-		return contents.length == contents[0].length;
+		return rowCount() == columnCount();
 	}
 	
 	/**
@@ -250,10 +279,10 @@ public class Matrix implements Cloneable {
 	 * @return true if this Matrix is diagonal, false otherwise
 	 */
 	public boolean isDiagonal() {
-		if(contents.length != contents[0].length)
+		if(rowCount() != columnCount())
 			return false;
-		for(int i = 0; i < contents.length; i++)
-			for(int j = 0; j < contents[0].length; j++)
+		for(int i = 0; i < rowCount(); i++)
+			for(int j = 0; j < columnCount(); j++)
 				if(i != j && contents[i][j] != 0)
 					return false;
 		return true;
@@ -269,9 +298,9 @@ public class Matrix implements Cloneable {
 	 * @return true if this Matrix is upper triangular, false otherwise
 	 */
 	public boolean isUpperTriangular() {
-		if(contents.length != contents[0].length)
+		if(rowCount() != columnCount())
 			return false;
-		for(int i = 0; i < contents.length; i++)
+		for(int i = 0; i < rowCount(); i++)
 			for(int j = 0; j < i; j++)
 				if(contents[i][j] != 0)
 					return false;
@@ -288,10 +317,10 @@ public class Matrix implements Cloneable {
 	 * @return true if this Matrix is lower triangular, false otherwise
 	 */
 	public boolean isLowerTriangular() {
-		if(contents.length != contents[0].length)
+		if(rowCount() != columnCount())
 			return false;
-		for(int i = 0; i < contents.length; i++)
-			for(int j = i + 1; j < contents[0].length; j++)
+		for(int i = 0; i < rowCount(); i++)
+			for(int j = i + 1; j < columnCount(); j++)
 				if(contents[i][j] != 0)
 					return false;
 		return true;
@@ -308,10 +337,10 @@ public class Matrix implements Cloneable {
 	 * @return true if this Matrix is diagonal, false otherwise
 	 */
 	public boolean isIndentityMatrix() {
-		if(contents.length != contents[0].length)
+		if(rowCount() != columnCount())
 			return false;
-		for(int i = 0; i < contents.length; i++)
-			for(int j = 0; j < contents[0].length; j++)
+		for(int i = 0; i < rowCount(); i++)
+			for(int j = 0; j < columnCount(); j++)
 				if(i != j && contents[i][j] != 0 || i == j && contents[i][j] != 1)
 					return false;
 		return true;
@@ -344,10 +373,10 @@ public class Matrix implements Cloneable {
 	 * @return true if the system is consistent, false otherwise
 	 */
 	public boolean isConsistent() {
-		if(rank(true) == contents.length || contents[0].length == 1) //call to rank forces generation of rref
+		if(rank(true) == rowCount() || columnCount() == 1) //call to rank forces generation of rref
 			return true;
-		for(int i = contents.length - 1; rref.contents[i][contents[0].length - 2] == 0; i--)
-			if(rref.contents[i][contents[0].length - 1] == 1)
+		for(int i = rowCount() - 1; rref.contents[i][rref.columnCount() - 2] == 0; i--)
+			if(rref.contents[i][rref.columnCount() - 1] == 1)
 				return false;
 		return true;
 	}
@@ -377,8 +406,8 @@ public class Matrix implements Cloneable {
 	public void divideRow(int i, double scalar) {
 		if(scalar == 0)
 			throw new IllegalArgumentException("Cannot divide a row by 0.");
-		if(i < 0 || i >= contents.length)
-			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (contents.length - 1) + "].");
+		if(i < 0 || i >= rowCount())
+			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (rowCount() - 1) + "].");
 		
 		for(int j = 0; j < contents[i].length; j++)
 			contents[i][j] /= scalar;
@@ -393,10 +422,10 @@ public class Matrix implements Cloneable {
 	 * @throws IllegalArgumentException if {@code iTarget} or {@code iSource} is negative or exceeds the valid indices of rows in this Matrix
 	 */
 	public void subtractRow(int iTarget, double multiple, int iSource) {
-		if(iTarget < 0 || iTarget >= contents.length)
-			throw new IllegalArgumentException("The paramter iTarget was not in the valid range [0, " + (contents.length - 1) + "].");
-		if(iSource < 0 || iSource >= contents.length)
-			throw new IllegalArgumentException("The paramter iSource was not in the valid range [0, " + (contents.length - 1) + "].");
+		if(iTarget < 0 || iTarget >= rowCount())
+			throw new IllegalArgumentException("The paramter iTarget was not in the valid range [0, " + (rowCount() - 1) + "].");
+		if(iSource < 0 || iSource >= rowCount())
+			throw new IllegalArgumentException("The paramter iSource was not in the valid range [0, " + (rowCount() - 1) + "].");
 		
 		for(int j = 0; j < contents[iTarget].length; j++)
 			contents[iTarget][j] -= contents[iSource][j] * multiple;
@@ -410,10 +439,10 @@ public class Matrix implements Cloneable {
 	 * @throws IllegalArgumentException if {@code i1} or {@code i2} is negative or exceeds the valid indices of rows in this Matrix
 	 */
 	public void swapRows(int i1, int i2) {
-		if(i1 < 0 || i1 >= contents.length)
-			throw new IllegalArgumentException("The paramter i1 was not in the valid range [0, " + (contents.length - 1) + "].");
-		if(i2 < 0 || i2 >= contents.length)
-			throw new IllegalArgumentException("The paramter i2 was not in the valid range [0, " + (contents.length - 1) + "].");
+		if(i1 < 0 || i1 >= rowCount())
+			throw new IllegalArgumentException("The paramter i1 was not in the valid range [0, " + (rowCount() - 1) + "].");
+		if(i2 < 0 || i2 >= rowCount())
+			throw new IllegalArgumentException("The paramter i2 was not in the valid range [0, " + (rowCount() - 1) + "].");
 		
 		double[] temp = contents[i1];
 		contents[i1] = contents[i2];
@@ -433,9 +462,9 @@ public class Matrix implements Cloneable {
 	 * @return a Matrix which is an augmented form of this Matrix
 	 */
 	public Matrix augment(double[] augment) {
-		double[][] augmentedContents = new double[contents.length][contents[0].length + 1];
-		for(int i = 0; i < contents.length; i++) {
-			for(int j = 0; j < contents[0].length; j++)
+		double[][] augmentedContents = new double[rowCount()][columnCount() + 1];
+		for(int i = 0; i < rowCount(); i++) {
+			for(int j = 0; j < columnCount(); j++)
 				augmentedContents[i][j] = contents[i][j];
 			augmentedContents[i][augmentedContents[0].length - 1] = augment[i];
 		}
@@ -451,9 +480,9 @@ public class Matrix implements Cloneable {
 		if(rref == null) {
 			Matrix rref = this.clone();
 			
-			for(int i = 0, j = 0; i < rref.contents.length; i++) {
-				while(j < rref.contents[0].length && rref.contents[i][j] == 0) {
-					for(int iCheck = i + 1; iCheck < contents.length; iCheck++)
+			for(int i = 0, j = 0; i < rref.rowCount(); i++) {
+				while(j < rref.columnCount() && rref.contents[i][j] == 0) {
+					for(int iCheck = i + 1; iCheck < rref.rowCount(); iCheck++)
 						if(rref.contents[iCheck][j] != 0) {
 							rref.swapRows(i, iCheck);
 							break;
@@ -461,10 +490,10 @@ public class Matrix implements Cloneable {
 					if(rref.contents[i][j] == 0)
 						j++;
 				}
-				if(j == rref.contents[0].length)
+				if(j == rref.columnCount())
 					break;
 				rref.divideRow(i, rref.contents[i][j]);
-				for(int iReduce = 0; iReduce < rref.contents.length; iReduce++)
+				for(int iReduce = 0; iReduce < rref.rowCount(); iReduce++)
 					if(iReduce != i)
 						rref.subtractRow(iReduce, rref.contents[iReduce][j], i);
 			}
@@ -494,8 +523,8 @@ public class Matrix implements Cloneable {
 	public int rank(boolean augmented) {
 		Matrix rref = rref();
 		int rank = 0, i = 0, j = 0;
-		while(i < rref.contents.length) {
-			while(j < rref.contents[0].length - (augmented ? 1 : 0)) {
+		while(i < rref.rowCount()) {
+			while(j < rref.columnCount() - (augmented ? 1 : 0)) {
 				if(rref.contents[i][j] == 1) {
 					rank++;
 					j++;
@@ -515,14 +544,14 @@ public class Matrix implements Cloneable {
 	 * @return the solution of the system if there is exactly one solution, null if there is no solution or infinitely many solutions
 	 */
 	public double[] findSolution() {
-		if(rank(true) != contents[0].length - 1 || contents[0].length == 1) //call to rank forces generation of rref
+		if(rank(true) != columnCount() - 1 || columnCount() == 1) //call to rank forces generation of rref
 			return null;
-		for(int i = contents.length - 1; rref.contents[i][contents[0].length - 2] == 0; i--)
-			if(rref.contents[i][contents[0].length - 1] == 1)
+		for(int i = rref.rowCount() - 1; rref.contents[i][rref.columnCount() - 2] == 0; i--)
+			if(rref.contents[i][rref.columnCount() - 1] == 1)
 				return null;
-		double[] result = new double[contents.length];
+		double[] result = new double[rref.rowCount()];
 		for(int i = 0; i < result.length; i++)
-			result[i] = rref.contents[i][contents[0].length - 1];
+			result[i] = rref.contents[i][rref.columnCount() - 1];
 		return result;
 	}
 	
@@ -545,8 +574,8 @@ public class Matrix implements Cloneable {
 	 */
 	public Matrix scalarMultiply(double scalar) {
 		Matrix product = this.clone();
-		for(int i = 0; i < product.contents.length; i++)
-			for(int j = 0; j < product.contents[0].length; j++)
+		for(int i = 0; i < product.rowCount(); i++)
+			for(int j = 0; j < product.columnCount(); j++)
 				product.contents[i][j] *= scalar;
 		return product;
 	}
@@ -560,12 +589,12 @@ public class Matrix implements Cloneable {
 	 * @throws ArithmeticException if the Matrices have different dimensions
 	 */
 	public Matrix add(Matrix m) {
-		if(this.contents.length != m.contents.length || this.contents[0].length != m.contents[0].length)
+		if(this.rowCount() != m.rowCount() || this.columnCount() != m.columnCount())
 			throw new ArithmeticException("Cannot add or subtract Matricies of different dimensions.");
 		
 		Matrix sum = this.clone();
-		for(int i = 0; i < sum.contents.length; i++)
-			for(int j = 0; j < sum.contents[0].length; j++)
+		for(int i = 0; i < sum.rowCount(); i++)
+			for(int j = 0; j < sum.columnCount(); j++)
 				sum.contents[i][j] += m.contents[i][j];
 		return sum;
 	}
@@ -597,14 +626,28 @@ public class Matrix implements Cloneable {
 	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of rows in {@code m}
 	 */
 	public Matrix matrixMultiply(Matrix m) {
-		if(this.contents[0].length != m.contents.length)
+		if(this.columnCount() != m.rowCount())
 			throw new ArithmeticException("The number of columns in the first Matrix must match the number of rows in the second to multiply them.");
 		
-		Matrix product = new Matrix(this.contents.length, m.contents[0].length);
-		for(int i = 0; i < product.contents.length; i++)
-			for(int j = 0; j < product.contents[0].length; j++)
+		Matrix product = new Matrix(this.rowCount(), m.columnCount());
+		for(int i = 0; i < product.rowCount(); i++)
+			for(int j = 0; j < product.columnCount(); j++)
 				product.contents[i][j] = this.getRowVector(i).dotProduct(m.getColumnVector(j));
 		return product;
+	}
+	
+	/**
+	 * Calculates the result of multiplying this Matrix by a Vector.
+	 * This is equivalent to multiplying this Matrix by another Matrix which has only one column.
+	 * The number of columns in this Matrix must match the number of components in the Vector.
+	 * The resulting Matrix will have dimensions n x 1, with n being the number of rows in this Matrix.
+	 * 
+	 * @param v the Vector to multiply by
+	 * @return the product of this Matrix and the {@code v}
+	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of components in {@code v}
+	 */
+	public Matrix matrixMultiply(Vector v) {
+		return matrixMultiply(new Matrix(v));
 	}
 	
 }

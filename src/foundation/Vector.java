@@ -149,6 +149,15 @@ public class Vector {
 	}
 	
 	/**
+	 * Retrieves the number of components in this Vector.
+	 * 
+	 * @return the number of components in this Vector
+	 */
+	public int componentCount() {
+		return components.length;
+	}
+	
+	/**
 	 * Calculates the length (norm) of this Vector
 	 * 
 	 * @return the length
