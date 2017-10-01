@@ -5,7 +5,7 @@ package foundation;
  * 
  * @author JeremiahDeGreeff
  */
-public class Vector {
+public class Vector implements Cloneable {
 	
 	//================================================================================
 	// Instance Variables
