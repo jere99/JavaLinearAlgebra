@@ -22,11 +22,6 @@ public class Matrix implements Cloneable {
 	 */
 	private Matrix rref = null;
 	
-	/**
-	 * Cached value for the rank of the Matrix so it only needs to be calculated once.
-	 */
-	private int rank = -1;
-	
 	//================================================================================
 	// Constructors
 	//================================================================================
@@ -70,7 +65,6 @@ public class Matrix implements Cloneable {
 				copy[i][j] = contents[i][j];
 		Matrix result = new Matrix(copy);
 		result.rref = this.rref == null ? null : this.equals(this.rref) ? result : this.rref.clone();
-		result.rank = this.rank;
 		return result;
 	}
 	
@@ -189,7 +183,6 @@ public class Matrix implements Cloneable {
 	 */
 	private void clearCache() {
 		rref = null;
-		rank = -1;
 	}
 	
 	//================================================================================
@@ -499,8 +492,6 @@ public class Matrix implements Cloneable {
 	 * @return the rank
 	 */
 	public int rank(boolean augmented) {
-		if(!augmented && rank != -1)
-			return rank;
 		Matrix rref = rref();
 		int rank = 0, i = 0, j = 0;
 		while(i < rref.contents.length) {
@@ -514,9 +505,6 @@ public class Matrix implements Cloneable {
 			}
 			i++;
 		}
-		
-		if(!augmented) //only cache rank if not flagged as augmented
-			this.rank = rank;
 		return rank;
 	}
 	
