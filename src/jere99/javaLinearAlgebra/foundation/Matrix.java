@@ -1,4 +1,4 @@
-package foundation;
+package jere99.javaLinearAlgebra.foundation;
 
 /**
  * Defines a matrix and provides matrix operations.

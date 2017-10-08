@@ -1,4 +1,6 @@
-import foundation.*;
+package jere99.javaLinearAlgebra;
+
+import jere99.javaLinearAlgebra.foundation.*;
 
 public class Main {
 
