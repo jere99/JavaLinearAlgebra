@@ -8,6 +8,23 @@ package jere99.javaLinearAlgebra.foundation;
 public class Vector implements Cloneable {
 	
 	//================================================================================
+	// Static Methods
+	//================================================================================
+	
+	/**
+	 * Generates a particular standard Vector in a m-space.
+	 * 
+	 * @param m the space in which the desired vector exists
+	 * @param i the index of the standard vector in m-space
+	 * @return the specified standard vector
+	 */
+	public static Vector getStandardVector(int m, int i) {
+		double[] components = new double[m];
+		components[i] = 1;
+		return new Vector(components);
+	}
+	
+	//================================================================================
 	// Instance Variables
 	//================================================================================
 	

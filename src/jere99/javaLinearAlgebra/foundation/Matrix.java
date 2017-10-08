@@ -8,6 +8,23 @@ package jere99.javaLinearAlgebra.foundation;
 public class Matrix implements Cloneable {
 	
 	//================================================================================
+	// Static Methods
+	//================================================================================
+	
+	/**
+	 * Generates the n x n identity Matrix.
+	 * 
+	 * @param n the dimensions of the Matrix
+	 * @return the n x n identity Matrix
+	 */
+	public static Matrix getIdentity(int n) {
+		double[][] contents = new double[n][n];
+		for(int k = 0; k < n; k++)
+			contents[k][k] = 1;
+		return new Matrix(contents);
+	}
+	
+	//================================================================================
 	// Instance Variables
 	//================================================================================
 	
