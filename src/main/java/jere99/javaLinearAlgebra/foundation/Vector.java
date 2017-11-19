@@ -217,6 +217,22 @@ public class Vector implements Cloneable {
 		return new Matrix(vectors).isConsistent(this);
 	}
 	
+	/**
+	 * Determines if this Vector is a distribution vector,
+	 * that is if all of its components are positive or zero and add up to 1.
+	 * 
+	 * @return true if this Vector is a distribution vector, false otherwise
+	 */
+	public boolean isDistributionVector() {
+		double sum = 0;
+		for(double component : components) {
+			if(component < 0)
+				return false;
+			sum += component;
+		}
+		return sum == 1;
+	}
+	
 	//================================================================================
 	// Vector Operations
 	//================================================================================

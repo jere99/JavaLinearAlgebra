@@ -368,6 +368,20 @@ public class Matrix implements Cloneable {
 		return augment(augment).isConsistent();
 	}
 	
+	/**
+	 * Determines if this Matrix is a transition matrix (stochastic matrix),
+	 * that is if all of its columns are distribution vectors.
+	 * 
+	 * @return true if this Matrix is a transition matrix, false otherwise
+	 * @see Vector#isDistributionVector()
+	 */
+	public boolean isTransitionMatrix() {
+		for(int j = 0; j < columnCount(); j++)
+			if(!getColumnVector(j).isDistributionVector())
+				return false;
+		return true;
+	}
+	
 	//================================================================================
 	// Elementary Row Operations
 	//================================================================================
