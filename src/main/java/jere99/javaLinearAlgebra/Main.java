@@ -1,18 +1,14 @@
 package jere99.javaLinearAlgebra;
 
 import jere99.javaLinearAlgebra.foundation.*;
+import jere99.javaLinearAlgebra.linearTransformations.*;
 
 public class Main {
 
 	public static void main(String[] args) {
-		Matrix a = new Matrix(new double[][]{{6,7},{8,9}});
-		Matrix b = new Matrix(new double[][]{{1,2},{3,5}});
-		
-		System.out.println(a);
-		System.out.println(b);
-		
-		System.out.println(a.multiply(b));
-		System.out.println(b.multiply(a));
+		LinearTransformation T = new Reflection(new Vector(new double[] {1, 1}));
+		System.out.println(T.getTransformationMatrix());
+		System.out.println(T.transform(new Vector(new double[] {5, -3})));
 	}
 
 }

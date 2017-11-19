@@ -1,19 +1,17 @@
 package jere99.javaLinearAlgebra.linearTransformations;
 
-import jere99.javaLinearAlgebra.foundation.Matrix;
-import jere99.javaLinearAlgebra.foundation.Vector;
+import jere99.javaLinearAlgebra.foundation.*;
 
 /**
  * Defines a linear transformation.
  * A transformation, T, is linear from m-space to n-space if and only if:
  * <ul>
- * <li>it transforms a Vector in m-space into a Vector in n-space by multiplying it by an n x m Matrix</li>
  * <li>T(v + w) = T(v) + T(w) for all vectors v and w in m-space</li>
  * <li>T(kv) = kT(v) for all vectors v in m-space and all scalars k</li>
  * </ul>
+ * This is equivalent to saying that T transforms a vector in m-space into a vector in n-space by multiplying it by an n x m matrix.
  * 
  * @author JeremiahDeGreeff
- * @see jere99.javaLinearAlgebra.foundation.Matrix
  */
 public class LinearTransformation {
 	
@@ -30,6 +28,15 @@ public class LinearTransformation {
 	 */
 	public LinearTransformation(Matrix transformationMatrix) {
 		this.transformationMatrix = transformationMatrix;
+	}
+	
+	/**
+	 * Retrieves the Matrix which represents this LinearTransformation.
+	 * 
+	 * @return the Matrix which represents this LinearTransformation.
+	 */
+	public Matrix getTransformationMatrix() {
+		return transformationMatrix;
 	}
 	
 	/**
