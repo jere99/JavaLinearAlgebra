@@ -1,6 +1,4 @@
-package jere99.javaLinearAlgebra.linearTransformations;
-
-import jere99.javaLinearAlgebra.foundation.*;
+package jere99.javaLinearAlgebra.foundation;
 
 /**
  * Defines a linear transformation.
@@ -15,6 +13,10 @@ import jere99.javaLinearAlgebra.foundation.*;
  */
 public class LinearTransformation {
 	
+	//================================================================================
+	// Instance Variables
+	//================================================================================
+	
 	/**
 	 * The transformation Matrix, A, of this linear transformation.
 	 * A linear transformation is defined as the result of multiplying this Matrix by an input vector.
@@ -26,6 +28,10 @@ public class LinearTransformation {
 	 */
 	private LinearTransformation inverse;
 	
+	//================================================================================
+	// Constructors
+	//================================================================================
+	
 	/**
 	 * Initializes a LinearTransformation with a specified transformation matrix.
 	 * 
@@ -34,6 +40,10 @@ public class LinearTransformation {
 	public LinearTransformation(Matrix transformationMatrix) {
 		this.transformationMatrix = transformationMatrix;
 	}
+	
+	//================================================================================
+	// Accessor Methods
+	//================================================================================
 	
 	/**
 	 * Retrieves the Matrix which represents this LinearTransformation.
@@ -71,17 +81,9 @@ public class LinearTransformation {
 		return transformationMatrix.isInvertible();
 	}
 	
-	/**
-	 * Calculates the inverse of this LinearTransformation, if it exists.
-	 * The result is cached for future access.
-	 * 
-	 * @return the inverse of this LinearTransformation if it exists, {@code null} otherwise
-	 */
-	public LinearTransformation getInverse() {
-		if(inverse == null)
-			inverse = new LinearTransformation(transformationMatrix.inverse());
-		return inverse;
-	}
+	//================================================================================
+	// Linear Transformation Operations
+	//================================================================================
 	
 	/**
 	 * Applies this linear transformation to a vector, that is multiplies a vector by this LinearTransformation's transformation matrix.
@@ -95,6 +97,18 @@ public class LinearTransformation {
 		if(v.componentCount() != this.getInputSpace())
 			throw new ArithmeticException("This linear transformation can only transform a Vector that is in " + this.getInputSpace() + "-space");
 		return transformationMatrix.multiply(v);
+	}
+	
+	/**
+	 * Calculates the inverse of this LinearTransformation, if it exists.
+	 * The result is cached for future access.
+	 * 
+	 * @return the inverse of this LinearTransformation if it exists, {@code null} otherwise
+	 */
+	public LinearTransformation getInverse() {
+		if(inverse == null)
+			inverse = new LinearTransformation(transformationMatrix.inverse());
+		return inverse;
 	}
 	
 }

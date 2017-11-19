@@ -1,5 +1,6 @@
 package jere99.javaLinearAlgebra.linearTransformations;
 
+import jere99.javaLinearAlgebra.foundation.LinearTransformation;
 import jere99.javaLinearAlgebra.foundation.Matrix;
 
 /**
