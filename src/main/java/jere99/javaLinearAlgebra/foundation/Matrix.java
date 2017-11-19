@@ -356,8 +356,33 @@ public class Matrix implements Cloneable {
 	 * @see Vector#isDistributionVector()
 	 */
 	public boolean isTransitionMatrix() {
+		return isTransitionMatrix(false);
+	}
+	
+	/**
+	 * Determines if this Matrix is a positive transition matrix,
+	 * that is if all of its columns are positive distribution vectors.
+	 * 
+	 * @return true if this Matrix is a transition matrix, false otherwise
+	 * @see Vector#isPositiveDistributionVector()
+	 */
+	public boolean isPositiveTransitionMatrix() {
+		return isTransitionMatrix(true);
+	}
+	
+	/**
+	 * Determines if this Matrix is a transition matrix (stochastic matrix),
+	 * that is if all of its columns are distribution vectors.
+	 * Can also determine if this Matrix is a positive transition matrix,
+	 * that is if all of its columns are positive distribution vectors.
+	 * 
+	 * @param positive if true will test for a positive transition matrix, if false will test for any transition matrix
+	 * @return true if this Matrix is a transition matrix, false otherwise
+	 * @see Vector#isDistributionVector(boolean)
+	 */
+	public boolean isTransitionMatrix(boolean positive) {
 		for(int j = 0; j < columnCount(); j++)
-			if(!getColumnVector(j).isDistributionVector())
+			if(!getColumnVector(j).isDistributionVector(positive))
 				return false;
 		return true;
 	}

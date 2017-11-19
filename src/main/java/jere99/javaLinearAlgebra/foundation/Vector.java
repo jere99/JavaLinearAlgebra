@@ -211,9 +211,32 @@ public class Vector implements Cloneable {
 	 * @return true if this Vector is a distribution vector, false otherwise
 	 */
 	public boolean isDistributionVector() {
+		return isDistributionVector(false);
+	}
+	
+	/**
+	 * Determines if this Vector is a positive distribution vector,
+	 * that is if all of its components are positive and add up to 1.
+	 * 
+	 * @return true if this Vector is a distribution vector, false otherwise
+	 */
+	public boolean isPositiveDistributionVector() {
+		return isDistributionVector(true);
+	}
+	
+	/**
+	 * Determines if this Vector is a distribution vector,
+	 * that is if all of its components are positive or zero and add up to 1.
+	 * Can also determine if this Vector is a positive distribution vector,
+	 * that is if all of its components are positive and add up to 1.
+	 * 
+	 * @param positive if true will test for a positive distribution vector, if false will test for any distribution vector
+	 * @return true if this Vector is a distribution vector, false otherwise
+	 */
+	public boolean isDistributionVector(boolean positive) {
 		double sum = 0;
 		for(double component : components) {
-			if(component < 0)
+			if(component < 0 || component == 0 && positive)
 				return false;
 			sum += component;
 		}
