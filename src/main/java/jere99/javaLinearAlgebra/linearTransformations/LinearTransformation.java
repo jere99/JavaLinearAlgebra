@@ -22,6 +22,11 @@ public class LinearTransformation {
 	private final Matrix transformationMatrix;
 	
 	/**
+	 * Cached copy of inverse so it only needs to be calculated once.
+	 */
+	private LinearTransformation inverse;
+	
+	/**
 	 * Initializes a LinearTransformation with a specified transformation matrix.
 	 * 
 	 * @param transformationMatrix the transformation matrix for the new LinearTransformation
@@ -55,6 +60,27 @@ public class LinearTransformation {
 	 */
 	public int getOutputSpace() {
 		return transformationMatrix.rowCount();
+	}
+	
+	/**
+	 * Determines if this LinearTransformation is invertible.
+	 * 
+	 * @return true if this LinearTransformation is invertible, false otherwise.
+	 */
+	public boolean isInvertible() {
+		return transformationMatrix.isInvertible();
+	}
+	
+	/**
+	 * Calculates the inverse of this LinearTransformation, if it exists.
+	 * The result is cached for future access.
+	 * 
+	 * @return the inverse of this LinearTransformation if it exists, {@code null} otherwise
+	 */
+	public LinearTransformation getInverse() {
+		if(inverse == null)
+			inverse = new LinearTransformation(transformationMatrix.inverse());
+		return inverse;
 	}
 	
 	/**

@@ -8,19 +8,42 @@ package jere99.javaLinearAlgebra.foundation;
 public class Matrix implements Cloneable {
 	
 	//================================================================================
+	// Static Methods
+	//================================================================================
+	
+	/**
+	 * Generates the n x n identity Matrix.
+	 * 
+	 * @param n the dimensions of the Matrix
+	 * @return the n x n identity Matrix
+	 */
+	public static Matrix getIdentity(int n) {
+		double[][] contents = new double[n][n];
+		for(int k = 0; k < n; k++)
+			contents[k][k] = 1;
+		return new Matrix(contents);
+	}
+	
+	//================================================================================
 	// Instance Variables
 	//================================================================================
 	
 	/**
 	 * The main contents of this n x m Matrix.
 	 */
-	private double[][] contents;
+	private final double[][] contents;
 	
 	/**
-	 * Cached reduced row echelon form so it only needs to be calculated once.
-	 * If this Matrix is in reduced row echelon form, this field could be self-referential.
+	 * Cached copy of reduced row echelon form so it only needs to be calculated once.
+	 * Note that if this Matrix is in reduced row echelon form, this field could be self-referential.
 	 */
 	private Matrix rref = null;
+	
+	/**
+	 * Cached copy of inverse so it only needs to be calculated once.
+	 * Note that if this Matrix is its own inverse, this field could be self-referential.
+	 */
+	private Matrix inverse = null;
 	
 	//================================================================================
 	// Constructors
@@ -86,7 +109,8 @@ public class Matrix implements Cloneable {
 			for(int j = 0; j < columnCount(); j++)
 				copy[i][j] = contents[i][j];
 		Matrix result = new Matrix(copy);
-		result.rref = this.rref == null ? null : this.equals(this.rref) ? result : this.rref.clone();
+		result.rref = this.rref == null ? null : this == this.rref ? result : this.rref.clone();
+		result.inverse = this.inverse == null ? null : this == this.inverse ? result : this.inverse.clone();
 		return result;
 	}
 	
@@ -150,9 +174,9 @@ public class Matrix implements Cloneable {
 	 */
 	public double getEntry(int i, int j) {
 		if(i < 0 || i >= rowCount())
-			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new IllegalArgumentException("The parameter i was not in the valid range [0, " + (rowCount() - 1) + "].");
 		if(j < 0 || j >= columnCount())
-			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (columnCount() - 1) + "].");
+			throw new IllegalArgumentException("The parameter j was not in the valid range [0, " + (columnCount() - 1) + "].");
 		return contents[i][j];
 	}
 	
@@ -165,7 +189,7 @@ public class Matrix implements Cloneable {
 	 */
 	public Vector getRowVector(int i) {
 		if(i < 0 || i >= rowCount())
-			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new IllegalArgumentException("The parameter i was not in the valid range [0, " + (rowCount() - 1) + "].");
 		
 		return new Vector(contents[i]);
 	}
@@ -179,7 +203,7 @@ public class Matrix implements Cloneable {
 	 */
 	public Vector getColumnVector(int j) {
 		if(j < 0 || j >= columnCount())
-			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (columnCount() - 1) + "].");
+			throw new IllegalArgumentException("The parameter j was not in the valid range [0, " + (columnCount() - 1) + "].");
 		
 		double[] column = new double[rowCount()];
 		for(int i = 0; i < column.length; i++)
@@ -207,10 +231,7 @@ public class Matrix implements Cloneable {
 	
 	/**
 	 * Determines if this Matrix is a square matrix,
-	 * that is if:
-	 * <ul>
-	 * <li>it has the same number of rows as it does columns</li>
-	 * </ul>
+	 * that is if it has the same number of rows as it does columns.
 	 * @return true if this Matrix is square, false otherwise
 	 */
 	public boolean isSquare() {
@@ -228,7 +249,7 @@ public class Matrix implements Cloneable {
 	 * @return true if this Matrix is diagonal, false otherwise
 	 */
 	public boolean isDiagonal() {
-		if(rowCount() != columnCount())
+		if(!isSquare())
 			return false;
 		for(int i = 0; i < rowCount(); i++)
 			for(int j = 0; j < columnCount(); j++)
@@ -248,7 +269,7 @@ public class Matrix implements Cloneable {
 	 * @return true if this Matrix is upper triangular, false otherwise
 	 */
 	public boolean isUpperTriangular() {
-		if(rowCount() != columnCount())
+		if(!isSquare())
 			return false;
 		for(int i = 0; i < rowCount(); i++)
 			for(int j = 0; j < i; j++)
@@ -268,7 +289,7 @@ public class Matrix implements Cloneable {
 	 * @return true if this Matrix is lower triangular, false otherwise
 	 */
 	public boolean isLowerTriangular() {
-		if(rowCount() != columnCount())
+		if(!isSquare())
 			return false;
 		for(int i = 0; i < rowCount(); i++)
 			for(int j = i + 1; j < columnCount(); j++)
@@ -289,7 +310,7 @@ public class Matrix implements Cloneable {
 	 * @return true if this Matrix is diagonal, false otherwise
 	 */
 	public boolean isIndentityMatrix() {
-		if(rowCount() != columnCount())
+		if(!isSquare())
 			return false;
 		for(int i = 0; i < rowCount(); i++)
 			for(int j = 0; j < columnCount(); j++)
@@ -322,8 +343,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Assumes that this instance is an augmented matrix which represents a system of linear equations.
 	 * Determines if this system is consistent.
+	 * Assumes that this instance is an augmented matrix which represents a system of linear equations.
 	 * 
 	 * @return true if the system is consistent, false otherwise
 	 */
@@ -337,8 +358,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Assumes that this instance is a coefficient matrix which when augmented with the passed column Vector represents a system of linear equations.
 	 * Determines if this system is consistent.
+	 * Assumes that this instance is a coefficient matrix which when augmented with the passed column Vector represents a system of linear equations.
 	 * 
 	 * @param augment the column Vector to turn this coefficient matrix into an augmented matrix
 	 * @return true if the system is consistent, false otherwise
@@ -387,6 +408,16 @@ public class Matrix implements Cloneable {
 		return true;
 	}
 	
+	/**
+	 * Determines if this Matrix is invertible.
+	 * This is equivalent to determining if this Matrix is an n x n Matrix of rank n.
+	 * 
+	 * @return true if this Matrix is invertible, false otherwise.
+	 */
+	public boolean isInvertible() {
+		return isSquare() && rank() == rowCount();
+	}
+	
 	//================================================================================
 	// Elementary Row Operations
 	//================================================================================
@@ -402,7 +433,7 @@ public class Matrix implements Cloneable {
 		if(scalar == 0)
 			throw new IllegalArgumentException("Cannot divide a row by 0.");
 		if(i < 0 || i >= rowCount())
-			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new IllegalArgumentException("The parameter i was not in the valid range [0, " + (rowCount() - 1) + "].");
 		
 		for(int j = 0; j < contents[i].length; j++)
 			contents[i][j] /= scalar;
@@ -418,9 +449,9 @@ public class Matrix implements Cloneable {
 	 */
 	private void subtractRow(int iTarget, double multiple, int iSource) {
 		if(iTarget < 0 || iTarget >= rowCount())
-			throw new IllegalArgumentException("The paramter iTarget was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new IllegalArgumentException("The parameter iTarget was not in the valid range [0, " + (rowCount() - 1) + "].");
 		if(iSource < 0 || iSource >= rowCount())
-			throw new IllegalArgumentException("The paramter iSource was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new IllegalArgumentException("The parameter iSource was not in the valid range [0, " + (rowCount() - 1) + "].");
 		
 		for(int j = 0; j < contents[iTarget].length; j++)
 			contents[iTarget][j] -= contents[iSource][j] * multiple;
@@ -435,9 +466,9 @@ public class Matrix implements Cloneable {
 	 */
 	private void swapRows(int i1, int i2) {
 		if(i1 < 0 || i1 >= rowCount())
-			throw new IllegalArgumentException("The paramter i1 was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new IllegalArgumentException("The parameter i1 was not in the valid range [0, " + (rowCount() - 1) + "].");
 		if(i2 < 0 || i2 >= rowCount())
-			throw new IllegalArgumentException("The paramter i2 was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new IllegalArgumentException("The parameter i2 was not in the valid range [0, " + (rowCount() - 1) + "].");
 		
 		double[] temp = contents[i1];
 		contents[i1] = contents[i2];
@@ -551,7 +582,7 @@ public class Matrix implements Cloneable {
 	 */
 	public Matrix augment(Vector augment) {
 		if(this.rowCount() != augment.componentCount())
-			throw new IllegalArgumentException("Can only augment a Matrix with a column Vector with which has the same number of components as the Matrix does rows.");
+			throw new IllegalArgumentException("Can only augment a Matrix with a column Vector which has the same number of components as the Matrix does rows.");
 		double[][] augmentedContents = new double[rowCount()][columnCount() + 1];
 		for(int i = 0; i < rowCount(); i++) {
 			for(int j = 0; j < columnCount(); j++)
@@ -562,9 +593,10 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Uses Gauss-Jordan elimination to determine the reduced row echelon form of this Matrix.
+	 * Uses Gauss-Jordan elimination to calculate the reduced row echelon form of this Matrix.
+	 * The result is cached for future access.
 	 * 
-	 * @return the reduced row echelon form
+	 * @return the reduced row echelon form of this Matrix
 	 */
 	public Matrix rref() {
 		if(rref == null) {
@@ -597,7 +629,7 @@ public class Matrix implements Cloneable {
 	 * Calculates the rank of this Matrix.
 	 * Equivalent to calling {@code rank(false)}
 	 * 
-	 * @return the rank
+	 * @return the rank of this Matrix
 	 */
 	public int rank() {
 		return rank(false);
@@ -608,7 +640,7 @@ public class Matrix implements Cloneable {
 	 * If this Matrix is flagged as being augmented, the last column will be ignored.
 	 * 
 	 * @param augmented true if this Matrix should be treated as an augmented matrix, false otherwise
-	 * @return the rank
+	 * @return the rank of this Matrix
 	 */
 	public int rank(boolean augmented) {
 		Matrix rref = rref();
@@ -628,8 +660,28 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Assumes that this instance is an augmented matrix which represents a system of linear equations.
+	 * Calculates the inverse of this Matrix, if it exists.
+	 * The result is cached for future access.
+	 * 
+	 * @return the inverse of this Matrix if it exists, {@code null} otherwise
+	 */
+	public Matrix inverse() {
+		if(inverse == null) {
+			if(!isSquare())
+				return null;
+			Matrix appended = this.append(getIdentity(rowCount())).rref();
+			Matrix left = appended.splice(0, this.columnCount());
+			if(!left.isIndentityMatrix())
+				return null;
+			Matrix inverse = appended.splice(this.columnCount());
+			this.inverse = inverse.equals(this) ? this : inverse;
+		}
+		return inverse;
+	}
+	
+	/**
 	 * Calculates the solution for that system, if it exists.
+	 * Assumes that this instance is an augmented matrix which represents a system of linear equations.
 	 * 
 	 * @return the solution of the system if there is exactly one solution, null if there is no solution or infinitely many solutions
 	 */
@@ -646,8 +698,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Assumes that this instance is a coefficient matrix which when augmented with the passed column Vector represents a system of linear equations.
 	 * Calculates the solution for that system, if it exists.
+	 * Assumes that this instance is a coefficient matrix which when augmented with the passed column Vector represents a system of linear equations.
 	 * 
 	 * @param augment the column Vector to turn this coefficient matrix into an augmented matrix
 	 * @return the solution of the system if there is exactly one solution, null if there is no solution or infinitely many solutions
@@ -657,21 +709,64 @@ public class Matrix implements Cloneable {
 		return augment(augment).findSolution();
 	}
 	
-	//================================================================================
-	// Static Methods
-	//================================================================================
-
 	/**
-	 * Generates the n x n identity Matrix.
+	 * Appends another Matrix as additional columns to the right of this Matrix.
+	 * The other Matrix must have the same number of rows as this Matrix.
 	 * 
-	 * @param n the dimensions of the Matrix
-	 * @return the n x n identity Matrix
+	 * @param m the Matrix to append
+	 * @return a new Matrix which is the result of appending {@code m} to this Matrix
+	 * @throws IllegalArgumentException if {@code m} does not have the same number of rows as this Matrix.
 	 */
-	public static Matrix getIdentity(int n) {
-		double[][] contents = new double[n][n];
-		for(int k = 0; k < n; k++)
-			contents[k][k] = 1;
-		return new Matrix(contents);
+	public Matrix append(Matrix m) {
+		if(this.rowCount() != m.rowCount())
+			throw new IllegalArgumentException("Can only append a Matrix to another Matrix if they have the same number of rows.");
+		
+		double[][] newContents = new double[rowCount()][this.columnCount() + m.columnCount()];
+		for(int i = 0; i < newContents.length; i++)
+			for(int j = 0; j < newContents[0].length; j++)
+				newContents[i][j] = (j < this.columnCount() ? this.contents[i][j] : m.contents[i][j - this.columnCount()]);
+		return new Matrix(newContents);
+	}
+	
+	/**
+	 * Splices a portion of the columns of this Matrix to form a new Matrix.
+	 * Specifically, this portion is from the specified column to the last column of this Matrix.
+	 * 
+	 * @param startColumn the column before which to begin the splice
+	 * @return the new Matrix formed as a result of the splice
+	 * @throws IllegalArgumentException if {@code startColumn} is negative or exceeds the valid indices of columns in this Matrix
+	 */
+	public Matrix splice(int startColumn) {
+		return splice(startColumn, columnCount());
+	}
+	
+	/**
+	 * Splices a portion of the columns of this Matrix to form a new Matrix.
+	 * Specifically, this portion is from the first specified column to the column before the second specified column.
+	 * 
+	 * @param startColumn the column before which to begin the splice
+	 * @param endColumn the column before which to end the splice
+	 * @return the new Matrix formed as a result of the splice
+	 * @throws IllegalArgumentException if any of the following is true:
+	 * <ul>
+	 * <li>{@code startColumn} is negative or exceeds the valid indices of columns in this Matrix</li>
+	 * <li>{@code endColumn} is negative or exceeds the valid indices of columns in this Matrix</li>
+	 * <li>{@code startColumn} is not less than {@code endColumn}</li>
+	 * </ul>
+	 */
+	public Matrix splice(int startColumn, int endColumn) {
+		if(startColumn < 0 || startColumn >= columnCount())
+			throw new IllegalArgumentException("The parameter startColumn was not in the valid range [0, " + (columnCount() - 1) + "].");
+		if(endColumn < 0 || endColumn >= columnCount())
+			throw new IllegalArgumentException("The parameter endColumn was not in the valid range [0, " + (columnCount() - 1) + "].");
+		if(startColumn >= endColumn)
+			throw new IllegalArgumentException("The parameter startColumn must be less than the parameter endColumn.");
+		
+		double[][] newContents = new double[rowCount()][endColumn - startColumn];
+		for(int i = 0; i < newContents.length; i++)
+			for(int j = 0; j < newContents[0].length; j++)
+				newContents[i][j] = this.contents[i][j + startColumn];
+		return new Matrix(newContents);
 	}
 	
 }

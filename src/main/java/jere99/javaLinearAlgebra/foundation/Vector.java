@@ -32,7 +32,7 @@ public class Vector implements Cloneable {
 	 * The main contents of this vector.
 	 * The number of components indicates the space in which this vector exists.
 	 */
-	private double[] components;
+	private final double[] components;
 	
 	//================================================================================
 	// Constructors
