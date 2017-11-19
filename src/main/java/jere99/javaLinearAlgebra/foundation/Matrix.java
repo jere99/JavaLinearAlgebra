@@ -27,26 +27,6 @@ public class Matrix implements Cloneable {
 	//================================================================================
 	
 	/**
-	 * Initializes an m x n Matrix without any initial contents.
-	 * 
-	 * @param n the number of rows in the matrix
-	 * @param m the number of columns in the matrix
-	 * @throws IllegalArgumentException if any of the following is true:
-	 * <ul>
-	 * <li>{@code n} is negative or zero</li>
-	 * <li>{@code n} is negative or zero</li>
-	 * </ul>
-	 */
-	public Matrix(int n, int m) {
-		if(n < 1)
-			throw new IllegalArgumentException("The parameter n is invalid - it must be positive.");
-		if(m < 1)
-			throw new IllegalArgumentException("The parameter m is invalid - it must be positive.");
-		
-		contents = new double[n][m];
-	}
-	
-	/**
 	 * Initializes a Matrix with initial contents.
 	 * 
 	 * @param initialContents the initial contents for the Matrix

@@ -39,19 +39,6 @@ public class Vector implements Cloneable {
 	//================================================================================
 	
 	/**
-	 * Initializes a Vector in {@code n} space without any initial components.
-	 * 
-	 * @param n the space in which the vector will exist
-	 * @throws IllegalArgumentException if {@code n} is negative or zero
-	 */
-	public Vector(int n) {
-		if(n < 1)
-			throw new IllegalArgumentException("The parameter n is invalid - it must be positive.");
-		
-		components = new double[n];
-	}
-	
-	/**
 	 * Initializes a Vector with initial components.
 	 * 
 	 * @param initialComponents the initial components for the Vector
