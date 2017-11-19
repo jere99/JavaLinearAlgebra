@@ -39,20 +39,28 @@ public class Vector implements Cloneable {
 	//================================================================================
 	
 	/**
-	 * Initializes an Vector in {@code n} space without any initial components.
+	 * Initializes a Vector in {@code n} space without any initial components.
 	 * 
 	 * @param n the space in which the vector will exist
+	 * @throws IllegalArgumentException if {@code n} is negative or zero
 	 */
 	public Vector(int n) {
+		if(n < 1)
+			throw new IllegalArgumentException("The parameter n is invalid - it must be positive.");
+		
 		components = new double[n];
 	}
 	
 	/**
-	 * Initializes an Vector with initial components.
+	 * Initializes a Vector with initial components.
 	 * 
 	 * @param initialComponents the initial components for the Vector
+	 * @throws IllegalArgumentException if {@code initialComponents} has length 0
 	 */
 	public Vector(double[] initialComponents) {
+		if(initialComponents.length == 0)
+			throw new IllegalArgumentException("The parameter initialComponents is invalid - it must have length of at least one.");
+		
 		components = initialComponents;
 	}
 	
@@ -110,38 +118,6 @@ public class Vector implements Cloneable {
 	}
 	
 	//================================================================================
-	// Mutator Methods
-	//================================================================================
-	
-	/**
-	 * Sets a components in this Vector.
-	 * 
-	 * @param i the index of the row to set
-	 * @param newComponent the new value to set
-	 * @return the old component at index {@code i}
-	 * @throws IllegalArgumentException if {@code i} is negative or exceeds the valid indices of components in this Vector
-	 */
-	public double setComponent(int i, double newComponent) {
-		if(i < 0 || i >= components.length)
-			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (components.length - 1) + "].");
-		double old = components[i];
-		components[i] = newComponent;
-		return old;
-	}
-	
-	/**
-	 * Sets all the components of this Vector.
-	 * 
-	 * @param newComponents the contents to set
-	 * @return the old components
-	 */
-	public double[] setContents(double[] newComponents) {
-		double[] old = components;
-		components = newComponents;
-		return old;
-	}
-	
-	//================================================================================
 	// Accessor Methods
 	//================================================================================
 	
@@ -196,12 +172,13 @@ public class Vector implements Cloneable {
 	}
 	
 	/**
-	 * Determines whether or not this Vector is parallel to another Vector.
+	 * Determines if this Vector is a scalar multiple of another Vector.
+	 * This is equivalent to determining if it is either parallel or antiparallel to the other vector.
 	 * 
 	 * @param v the Vector to compare this Vector to
-	 * @return true if they are parallel, false otherwise
+	 * @return true if they are scalar multiples of each other, false otherwise
 	 */
-	public boolean isParallel(Vector v) {
+	public boolean isScalarMultiple(Vector v) {
 		if(this.components.length != v.components.length)
 			return false;
 		if(this.isZeroVector())
@@ -220,7 +197,7 @@ public class Vector implements Cloneable {
 	}
 	
 	/**
-	 * Determines whether or not this Vector is orthogonal to another Vector.
+	 * Determines if this Vector is orthogonal to another Vector.
 	 * 
 	 * @param v the Vector to compare this Vector to
 	 * @return true if they are orthogonal, false otherwise
@@ -230,7 +207,7 @@ public class Vector implements Cloneable {
 	}
 	
 	/**
-	 * Determines whether or not this Vector is a linear combination of an array of Vectors,
+	 * Determines if this Vector is a linear combination of an array of Vectors,
 	 * that is if this Vector could be represented as the sum of scalar multiples of each of the provided Vectors.
 	 * 
 	 * @param vectors the Vectors to test

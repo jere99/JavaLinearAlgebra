@@ -8,23 +8,6 @@ package jere99.javaLinearAlgebra.foundation;
 public class Matrix implements Cloneable {
 	
 	//================================================================================
-	// Static Methods
-	//================================================================================
-	
-	/**
-	 * Generates the n x n identity Matrix.
-	 * 
-	 * @param n the dimensions of the Matrix
-	 * @return the n x n identity Matrix
-	 */
-	public static Matrix getIdentity(int n) {
-		double[][] contents = new double[n][n];
-		for(int k = 0; k < n; k++)
-			contents[k][k] = 1;
-		return new Matrix(contents);
-	}
-	
-	//================================================================================
 	// Instance Variables
 	//================================================================================
 	
@@ -48,8 +31,18 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param n the number of rows in the matrix
 	 * @param m the number of columns in the matrix
+	 * @throws IllegalArgumentException if any of the following is true:
+	 * <ul>
+	 * <li>{@code n} is negative or zero</li>
+	 * <li>{@code n} is negative or zero</li>
+	 * </ul>
 	 */
 	public Matrix(int n, int m) {
+		if(n < 1)
+			throw new IllegalArgumentException("The parameter n is invalid - it must be positive.");
+		if(m < 1)
+			throw new IllegalArgumentException("The parameter m is invalid - it must be positive.");
+		
 		contents = new double[n][m];
 	}
 	
@@ -57,9 +50,18 @@ public class Matrix implements Cloneable {
 	 * Initializes a Matrix with initial contents.
 	 * 
 	 * @param initialContents the initial contents for the Matrix
-	 * @throws IllegalArgumentException if the rows of {@code initialContents} do not all have the same length
+	 * @throws IllegalArgumentException if any of the following is true:
+	 * <ul>
+	 * <li>{@code initialConents} has length zero,</li>
+	 * <li>{@code initialConents[0]} has length zero,</li>
+	 * <li>the rows of {@code initialContents} do not all have the same length</li>
+	 * </ul>
 	 */
 	public Matrix(double[][] initialContents) {
+		if(initialContents.length == 0)
+			throw new IllegalArgumentException("The parameter initialContents is invalid - it must have at least one row.");
+		if(initialContents[0].length == 0)
+			throw new IllegalArgumentException("The parameter initialContents is invalid - it must have at least one column.");
 		for(double[] row : initialContents)
 			if(row.length != initialContents[0].length)
 				throw new IllegalArgumentException("The parameter initialContents is invalid - all of its rows must have the same length.");
@@ -71,9 +73,15 @@ public class Matrix implements Cloneable {
 	 * Initializes a Matrix from its column vectors.
 	 * 
 	 * @param columns the Vectors which will form the columns of the initial contents of the Matrix
-	 * @throws IllegalArgumentException if the Vectors in {@code vectors} are not all in the same space
+	 * @throws IllegalArgumentException if any of the following is true:
+	 * <ul>
+	 * <li>{@code columns} has length 0</li>
+	 * <li>the Vectors in {@code columns} are not all in the same space</li>
+	 * </ul>
 	 */
 	public Matrix(Vector[] columns) {
+		if(columns.length == 0)
+			throw new IllegalArgumentException("The parameter columns is invalid - it must have length of at least one.");
 		for(Vector v : columns)
 			if(v.componentCount() != columns[0].componentCount())
 				throw new IllegalArgumentException("The parameter columns is invalid - all of its Vectors must be in the same space.");
@@ -106,7 +114,7 @@ public class Matrix implements Cloneable {
 	 * Indicates whether some other object is "equal to" this one.
 	 * 
 	 * <p>
-	 * The other object is considered "equal" if either:
+	 * The other object is considered "equal" if any of the following is true:
 	 * <ul>
 	 * <li>The other object references this instance. In other words {@code this == obj} has the value {@code true}.</li>
 	 * <li>The other object is a {@code Matrix} and has contents identical to those of this instance.</li>
@@ -145,111 +153,31 @@ public class Matrix implements Cloneable {
 	}
 	
 	//================================================================================
-	// Mutator Methods
-	//================================================================================
-	
-	/**
-	 * Sets a value in this Matrix.
-	 * 
-	 * @param i the index of the row to set
-	 * @param j the index of the column to set
-	 * @param newValue the new value to set
-	 * @return the old value at the same indices
-	 * @throws IllegalArgumentException
-	 * 		if {@code i} is negative or exceeds the valid indices of rows in this Matrix
-	 * 		or {@code j} is negative or exceeds the valid indices of rows in this Matrix
-	 */
-	public double setValue(int i, int j, double newValue) {
-		if(i < 0 || i >= rowCount())
-			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (rowCount() - 1) + "].");
-		if(j < 0 || j >= columnCount())
-			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (columnCount() - 1) + "].");
-		
-		clearCache();
-		double old = contents[i][j];
-		contents[i][j] = newValue;
-		return old;
-	}
-	
-	/**
-	 * Sets a row Vector in this Matrix.
-	 * 
-	 * @param i the index of the row to set
-	 * @param newRow the new row vector
-	 * @return the old row at the same index
-	 * @throws IllegalArgumentException
-	 * 		if {@code i} is negative or exceeds the valid indices of rows in this Matrix
-	 * 		or the number of components in {@code newRow} is not the same as the length of the rows in this Matrix
-	 */
-	public double[] setRowVector(int i, Vector newRow) {
-		if(i < 0 || i >= rowCount())
-			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (rowCount() - 1) + "].");
-		if(newRow.componentCount() != columnCount())
-			throw new IllegalArgumentException("The parameter newRow has an invalid length - it must be length: " + columnCount() + ".");
-		
-		clearCache();
-		double[] old = contents[i];
-		contents[i] = newRow.getComponents();
-		return old;
-	}
-	
-	/**
-	 * Sets a column Vector in this Matrix.
-	 * 
-	 * @param j the index of the column to set
-	 * @param newColumn the new column Vector
-	 * @return the old column at the same index
-	 * @throws IllegalArgumentException
-	 * 		if {@code j} is negative or exceeds the valid indices of columns in this Matrix
-	 * 		or the number of components in {@code newColumn} is not the same as the length of the columns in this Matrix
-	 */
-	public double[] setColumnVector(int j, Vector newColumn) {
-		if(j < 0 || j >= columnCount())
-			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (columnCount() - 1) + "].");
-		if(newColumn.componentCount() != rowCount())
-			throw new IllegalArgumentException("The parameter newColumn has an invalid length - it must be length: " + rowCount() + ".");
-		
-		clearCache();
-		double[] old = new double[rowCount()];
-		for(int i = 0; i < rowCount(); i++) {
-			old[i] = contents[i][j];
-			contents[i][j] = newColumn.getComponent(i);
-		}
-		return old;
-	}
-	
-	/**
-	 * Sets the entire contents of this Matrix.
-	 * 
-	 * @param newContents the contents to set
-	 * @return the old contents
-	 * @throws IllegalArgumentException if the rows of {@code newContents} do not all have the same length
-	 */
-	public double[][] setContents(double[][] newContents) {
-		for(double[] row : newContents)
-			if(row.length != newContents[0].length)
-				throw new IllegalArgumentException("The parameter newContents is invalid - all of its rows must have the same length.");
-		
-		clearCache();
-		double[][] old = contents;
-		contents = newContents;
-		return old;
-	}
-	
-	/**
-	 * Resets the cached rref and rank fields.
-	 * Should be called whenever the contents of this Matrix change by means of anything other than an elementary row operation.
-	 */
-	private void clearCache() {
-		rref = null;
-	}
-	
-	//================================================================================
 	// Accessor Methods
 	//================================================================================
 	
 	/**
-	 * Retrieves the the row vector of one of the rows in this Matrix.
+	 * Retrieves an element of this Matrix.
+	 * 
+	 * @param i the row of the element
+	 * @param j the column of the element
+	 * @return the entry at the i-th row and the j-th column
+	 * @throws IllegalArgumentException if any of the following is true:
+	 * <ul>
+	 * <li>{@code i} is negative or exceeds the valid indices of rows in this Matrix</li>
+	 * <li>{@code j} is negative or exceeds the valid indices of columns in this Matrix</li>
+	 * </ul>
+	 */
+	public double getEntry(int i, int j) {
+		if(i < 0 || i >= rowCount())
+			throw new IllegalArgumentException("The paramter i was not in the valid range [0, " + (rowCount() - 1) + "].");
+		if(j < 0 || j >= columnCount())
+			throw new IllegalArgumentException("The paramter j was not in the valid range [0, " + (columnCount() - 1) + "].");
+		return contents[i][j];
+	}
+	
+	/**
+	 * Retrieves the row vector of one of the rows in this Matrix.
 	 * 
 	 * @param i the index of the row to retrieve
 	 * @return the row vector of row {@code i} in this Matrix
@@ -263,7 +191,7 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Retrieves the the column vector of one of the column in this Matrix.
+	 * Retrieves the column vector of one of the column in this Matrix.
 	 * 
 	 * @param j the index of the column to retrieve
 	 * @return the column vector of column {@code j} in this Matrix
@@ -277,15 +205,6 @@ public class Matrix implements Cloneable {
 		for(int i = 0; i < column.length; i++)
 			column[i] = contents[i][j];
 		return new Vector(column);
-	}
-	
-	/**
-	 * Retrieves the contents of this Matrix.
-	 * 
-	 * @return the contents of this Matrix
-	 */
-	public double[][] getContents() {
-		return contents;
 	}
 	
 	/**
@@ -307,7 +226,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Determines if this Matrix is a square matrix, that is if:
+	 * Determines if this Matrix is a square matrix,
+	 * that is if:
 	 * <ul>
 	 * <li>it has the same number of rows as it does columns</li>
 	 * </ul>
@@ -318,7 +238,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Determines if this Matrix is diagonal, that is if:
+	 * Determines if this Matrix is diagonal,
+	 * that is if:
 	 * <ul>
 	 * <li>it is square</li>
 	 * <li>all of its entries which are not on the main diagonal are zeros</li>
@@ -337,7 +258,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Determines if this Matrix is upper triangular, that is if:
+	 * Determines if this Matrix is upper triangular,
+	 * that is if:
 	 * <ul>
 	 * <li>it is square</li>
 	 * <li>all of its entries which are below the main diagonal are zeros</li>
@@ -356,7 +278,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Determines if this Matrix is lower triangular, that is if:
+	 * Determines if this Matrix is lower triangular,
+	 * that is if:
 	 * <ul>
 	 * <li>it is square</li>
 	 * <li>all of its entries which are above the main diagonal are zeros</li>
@@ -375,7 +298,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Determines if this Matrix is an identity Matrix, that is if:
+	 * Determines if this Matrix is an identity Matrix,
+	 * that is if:
 	 * <ul>
 	 * <li>it is square</li>
 	 * <li>it is diagonal</li>
@@ -395,7 +319,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Determines if this Matrix is a zero matrix, that is if all of its entries are zeros.
+	 * Determines if this Matrix is a zero matrix,
+	 * that is if all of its entries are zeros.
 	 * 
 	 * @return true if this Matrix is a zero matrix, false otherwise
 	 */
@@ -408,6 +333,8 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
+	 * Determines if this Matrix is in reduced row echelon form.
+	 * 
 	 * @return true if this Matrix is in reduced row echelon form, false otherwise
 	 */
 	public boolean isRref() {
@@ -416,7 +343,7 @@ public class Matrix implements Cloneable {
 	
 	/**
 	 * Assumes that this instance is an augmented matrix which represents a system of linear equations.
-	 * Determines whether or not this system is consistent.
+	 * Determines if this system is consistent.
 	 * 
 	 * @return true if the system is consistent, false otherwise
 	 */
@@ -431,7 +358,7 @@ public class Matrix implements Cloneable {
 	
 	/**
 	 * Assumes that this instance is a coefficient matrix which when augmented with the passed column Vector represents a system of linear equations.
-	 * Determines whether or not this system is consistent.
+	 * Determines if this system is consistent.
 	 * 
 	 * @param augment the column Vector to turn this coefficient matrix into an augmented matrix
 	 * @return true if the system is consistent, false otherwise
@@ -452,7 +379,7 @@ public class Matrix implements Cloneable {
 	 * @param scalar the non-zero number to divide by
 	 * @throws IllegalArgumentException if {@code scalar == 0} or if {@code i] is negative or exceeds the valid indices of rows in this Matrix
 	 */
-	public void divideRow(int i, double scalar) {
+	private void divideRow(int i, double scalar) {
 		if(scalar == 0)
 			throw new IllegalArgumentException("Cannot divide a row by 0.");
 		if(i < 0 || i >= rowCount())
@@ -470,7 +397,7 @@ public class Matrix implements Cloneable {
 	 * @param iSource the row to subtract from the target row
 	 * @throws IllegalArgumentException if {@code iTarget} or {@code iSource} is negative or exceeds the valid indices of rows in this Matrix
 	 */
-	public void subtractRow(int iTarget, double multiple, int iSource) {
+	private void subtractRow(int iTarget, double multiple, int iSource) {
 		if(iTarget < 0 || iTarget >= rowCount())
 			throw new IllegalArgumentException("The paramter iTarget was not in the valid range [0, " + (rowCount() - 1) + "].");
 		if(iSource < 0 || iSource >= rowCount())
@@ -487,7 +414,7 @@ public class Matrix implements Cloneable {
 	 * @param i2 the second row to swap
 	 * @throws IllegalArgumentException if {@code i1} or {@code i2} is negative or exceeds the valid indices of rows in this Matrix
 	 */
-	public void swapRows(int i1, int i2) {
+	private void swapRows(int i1, int i2) {
 		if(i1 < 0 || i1 >= rowCount())
 			throw new IllegalArgumentException("The paramter i1 was not in the valid range [0, " + (rowCount() - 1) + "].");
 		if(i2 < 0 || i2 >= rowCount())
@@ -561,10 +488,10 @@ public class Matrix implements Cloneable {
 		if(this.columnCount() != v.componentCount())
 			throw new ArithmeticException("The number of columns in this Matrix must match the number of components in {@code v} to multiply them.");
 		
-		Vector product = new Vector(this.rowCount());
-		for(int i = 0; i < product.componentCount(); i++)
-			product.setComponent(i, this.getRowVector(i).dotProduct(v));
-		return product;
+		double[] product = new double[rowCount()];
+		for(int i = 0; i < rowCount(); i++)
+			product[i] = getRowVector(i).dotProduct(v);
+		return new Vector(product);
 	}
 	
 	/**
@@ -585,10 +512,13 @@ public class Matrix implements Cloneable {
 		if(this.columnCount() != m.rowCount())
 			throw new ArithmeticException("The number of columns in the first Matrix must match the number of rows in the second to multiply them.");
 		
-		Matrix product = new Matrix(this.rowCount(), m.columnCount());
-		for(int j = 0; j < product.columnCount(); j++)
-			product.setColumnVector(j, this.multiply(m.getColumnVector(j)));
-		return product;
+		double[][] product = new double[this.rowCount()][m.columnCount()];
+		for(int j = 0; j < product[0].length; j++) {
+			Vector columnVector = this.multiply(m.getColumnVector(j));
+			for(int i = 0; i < product.length; i++)
+				product[i][j] = columnVector.getComponent(i);
+		}
+		return new Matrix(product);
 	}
 	
 	/**
@@ -706,6 +636,23 @@ public class Matrix implements Cloneable {
 	 */
 	public double[] findSolution(Vector augment) {
 		return augment(augment).findSolution();
+	}
+	
+	//================================================================================
+	// Static Methods
+	//================================================================================
+
+	/**
+	 * Generates the n x n identity Matrix.
+	 * 
+	 * @param n the dimensions of the Matrix
+	 * @return the n x n identity Matrix
+	 */
+	public static Matrix getIdentity(int n) {
+		double[][] contents = new double[n][n];
+		for(int k = 0; k < n; k++)
+			contents[k][k] = 1;
+		return new Matrix(contents);
 	}
 	
 }
