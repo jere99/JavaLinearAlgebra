@@ -1,5 +1,6 @@
 package jere99.javaLinearAlgebra.foundation;
 
+
 /**
  * Defines a matrix and provides matrix operations.
  * 
@@ -166,7 +167,7 @@ public class Matrix implements Cloneable {
 	 * @param i the row of the element
 	 * @param j the column of the element
 	 * @return the entry at the i-th row and the j-th column
-	 * @throws IllegalArgumentException if any of the following is true:
+	 * @throws MatrixIndexOutOfBoundsException if any of the following is true:
 	 * <ul>
 	 * <li>{@code i} is negative or exceeds the valid indices of rows in this Matrix</li>
 	 * <li>{@code j} is negative or exceeds the valid indices of columns in this Matrix</li>
@@ -174,9 +175,9 @@ public class Matrix implements Cloneable {
 	 */
 	public double getEntry(int i, int j) {
 		if(i < 0 || i >= rowCount())
-			throw new IllegalArgumentException("The parameter i was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new MatrixIndexOutOfBoundsException(i, true);
 		if(j < 0 || j >= columnCount())
-			throw new IllegalArgumentException("The parameter j was not in the valid range [0, " + (columnCount() - 1) + "].");
+			throw new MatrixIndexOutOfBoundsException(j, false);
 		return contents[i][j];
 	}
 	
@@ -185,13 +186,16 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param i the index of the row to retrieve
 	 * @return the row vector of row {@code i} in this Matrix
-	 * @throws IllegalArgumentException if {@code i} is negative or exceeds the valid indices of rows in this Matrix
+	 * @throws MatrixIndexOutOfBoundsException if {@code i} is negative or exceeds the valid indices of rows in this Matrix
 	 */
 	public Vector getRowVector(int i) {
 		if(i < 0 || i >= rowCount())
-			throw new IllegalArgumentException("The parameter i was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new MatrixIndexOutOfBoundsException(i, true);
 		
-		return new Vector(contents[i]);
+		double[] row = new double[columnCount()];
+		for(int j = 0; j < row.length; j++)
+			row[j] = contents[i][j];
+		return new Vector(row);
 	}
 	
 	/**
@@ -199,11 +203,11 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param j the index of the column to retrieve
 	 * @return the column vector of column {@code j} in this Matrix
-	 * @throws IllegalArgumentException if {@code j} is negative or exceeds the valid indices of columns in this Matrix
+	 * @throws MatrixIndexOutOfBoundsException if {@code j} is negative or exceeds the valid indices of columns in this Matrix
 	 */
 	public Vector getColumnVector(int j) {
 		if(j < 0 || j >= columnCount())
-			throw new IllegalArgumentException("The parameter j was not in the valid range [0, " + (columnCount() - 1) + "].");
+			throw new MatrixIndexOutOfBoundsException(j, false);
 		
 		double[] column = new double[rowCount()];
 		for(int i = 0; i < column.length; i++)
@@ -363,10 +367,10 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param augment the column Vector to turn this coefficient matrix into an augmented matrix
 	 * @return true if the system is consistent, false otherwise
-	 * @throws IllegalArgumentException if the number of components of {@code augment} does not equal the number or rows in this Matrix
+	 * @throws IllegalArgumentException if the number of components of {@code augment} does not match the number of rows in this Matrix
 	 */
 	public boolean isConsistent(Vector augment) {
-		return augment(augment).isConsistent();
+		return this.augment(augment).isConsistent();
 	}
 	
 	/**
@@ -427,13 +431,14 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param i the index of the row to set
 	 * @param scalar the non-zero number to divide by
-	 * @throws IllegalArgumentException if {@code scalar == 0} or if {@code i] is negative or exceeds the valid indices of rows in this Matrix
+	 * @throws ArithmeticException if {@code scalar == 0}
+	 * @throws MatrixIndexOutOfBoundsException if {@code i] is negative or exceeds the valid indices of rows in this Matrix
 	 */
 	private void divideRow(int i, double scalar) {
 		if(scalar == 0)
-			throw new IllegalArgumentException("Cannot divide a row by 0.");
+			throw new ArithmeticException("Cannot divide a row by 0.");
 		if(i < 0 || i >= rowCount())
-			throw new IllegalArgumentException("The parameter i was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new MatrixIndexOutOfBoundsException(i, true);
 		
 		for(int j = 0; j < contents[i].length; j++)
 			contents[i][j] /= scalar;
@@ -445,13 +450,13 @@ public class Matrix implements Cloneable {
 	 * @param iTarget the row which will be subtracted from
 	 * @param multiple the number to multiply the source row by before subtracting
 	 * @param iSource the row to subtract from the target row
-	 * @throws IllegalArgumentException if {@code iTarget} or {@code iSource} is negative or exceeds the valid indices of rows in this Matrix
+	 * @throws MatrixIndexOutOfBoundsException if {@code iTarget} or {@code iSource} is negative or exceeds the valid indices of rows in this Matrix
 	 */
 	private void subtractRow(int iTarget, double multiple, int iSource) {
 		if(iTarget < 0 || iTarget >= rowCount())
-			throw new IllegalArgumentException("The parameter iTarget was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new MatrixIndexOutOfBoundsException(iTarget, true);
 		if(iSource < 0 || iSource >= rowCount())
-			throw new IllegalArgumentException("The parameter iSource was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new MatrixIndexOutOfBoundsException(iSource, true);
 		
 		for(int j = 0; j < contents[iTarget].length; j++)
 			contents[iTarget][j] -= contents[iSource][j] * multiple;
@@ -462,13 +467,13 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param i1 the first row to swap
 	 * @param i2 the second row to swap
-	 * @throws IllegalArgumentException if {@code i1} or {@code i2} is negative or exceeds the valid indices of rows in this Matrix
+	 * @throws MatrixIndexOutOfBoundsException if {@code i1} or {@code i2} is negative or exceeds the valid indices of rows in this Matrix
 	 */
 	private void swapRows(int i1, int i2) {
 		if(i1 < 0 || i1 >= rowCount())
-			throw new IllegalArgumentException("The parameter i1 was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new MatrixIndexOutOfBoundsException(i1, true);
 		if(i2 < 0 || i2 >= rowCount())
-			throw new IllegalArgumentException("The parameter i2 was not in the valid range [0, " + (rowCount() - 1) + "].");
+			throw new MatrixIndexOutOfBoundsException(i2, true);
 		
 		double[] temp = contents[i1];
 		contents[i1] = contents[i2];
@@ -485,7 +490,7 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param m the Matrix to add
 	 * @return the sum of the two Matrices
-	 * @throws ArithmeticException if the Matrices have different dimensions
+	 * @throws ArithmeticException if {@code m} and this Matrix have different dimensions
 	 */
 	public Matrix add(Matrix m) {
 		if(this.rowCount() != m.rowCount() || this.columnCount() != m.columnCount())
@@ -504,7 +509,7 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param m the Matrix to subtract
 	 * @return the difference of the two Matrices
-	 * @throws ArithmeticException if the Matrices have different dimensions
+	 * @throws ArithmeticException if {@code m} and this Matrix have different dimensions
 	 */
 	public Matrix subtract(Matrix m) {
 		return this.add(m.multiply(-1));
@@ -532,7 +537,7 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param v the Vector to multiply by
 	 * @return the product of this Matrix and the {@code v}
-	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of components in {@code v}
+	 * @throws ArithmeticException if the number of components in {@code v} does not match the number of columns in this Matrix
 	 */
 	public Vector multiply(Vector v) {
 		if(this.columnCount() != v.componentCount())
@@ -556,7 +561,7 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param m the Matrix to multiply by
 	 * @return the product of the Matrices
-	 * @throws ArithmeticException if the number of columns in this Matrix does not match the number of rows in {@code m}
+	 * @throws ArithmeticException if the number of rows in {@code m} does not match the number of columns in this Matrix
 	 */
 	public Matrix multiply(Matrix m) {
 		if(this.columnCount() != m.rowCount())
@@ -578,7 +583,7 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param augment the column Vector to append to this Matrix
 	 * @return a Matrix which is an augmented form of this Matrix
-	 * @throws IllegalArgumentException if the number of components of {@code augment} does not equal the number or rows in this Matrix
+	 * @throws IllegalArgumentException if the number of components of {@code augment} does not match the number of rows in this Matrix
 	 */
 	public Matrix augment(Vector augment) {
 		if(this.rowCount() != augment.componentCount())
@@ -703,10 +708,10 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param augment the column Vector to turn this coefficient matrix into an augmented matrix
 	 * @return the solution of the system if there is exactly one solution, null if there is no solution or infinitely many solutions
-	 * @throws IllegalArgumentException if the number of components of {@code augment} does not equal the number or rows in this Matrix
+	 * @throws IllegalArgumentException if the number of components of {@code augment} does not match the number of rows in this Matrix
 	 */
 	public double[] findSolution(Vector augment) {
-		return augment(augment).findSolution();
+		return this.augment(augment).findSolution();
 	}
 	
 	/**
@@ -715,7 +720,7 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param m the Matrix to append
 	 * @return a new Matrix which is the result of appending {@code m} to this Matrix
-	 * @throws IllegalArgumentException if {@code m} does not have the same number of rows as this Matrix.
+	 * @throws IllegalArgumentException if {@code m} does not have the same number of rows as this Matrix
 	 */
 	public Matrix append(Matrix m) {
 		if(this.rowCount() != m.rowCount())
@@ -734,7 +739,7 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param startColumn the column before which to begin the splice
 	 * @return the new Matrix formed as a result of the splice
-	 * @throws IllegalArgumentException if {@code startColumn} is negative or exceeds the valid indices of columns in this Matrix
+	 * @throws MatrixIndexOutOfBoundsException if {@code startColumn} is negative or exceeds the valid indices of columns in this Matrix
 	 */
 	public Matrix splice(int startColumn) {
 		return splice(startColumn, columnCount());
@@ -747,7 +752,7 @@ public class Matrix implements Cloneable {
 	 * @param startColumn the column before which to begin the splice
 	 * @param endColumn the column before which to end the splice
 	 * @return the new Matrix formed as a result of the splice
-	 * @throws IllegalArgumentException if any of the following is true:
+	 * @throws MatrixIndexOutOfBoundsException if any of the following is true:
 	 * <ul>
 	 * <li>{@code startColumn} is negative or exceeds the valid indices of columns in this Matrix</li>
 	 * <li>{@code endColumn} is negative or exceeds the valid indices of columns in this Matrix</li>
@@ -756,11 +761,11 @@ public class Matrix implements Cloneable {
 	 */
 	public Matrix splice(int startColumn, int endColumn) {
 		if(startColumn < 0 || startColumn >= columnCount())
-			throw new IllegalArgumentException("The parameter startColumn was not in the valid range [0, " + (columnCount() - 1) + "].");
+			throw new MatrixIndexOutOfBoundsException(startColumn, false);
 		if(endColumn < 0 || endColumn >= columnCount())
-			throw new IllegalArgumentException("The parameter endColumn was not in the valid range [0, " + (columnCount() - 1) + "].");
+			throw new MatrixIndexOutOfBoundsException(endColumn, false);
 		if(startColumn >= endColumn)
-			throw new IllegalArgumentException("The parameter startColumn must be less than the parameter endColumn.");
+			throw new MatrixIndexOutOfBoundsException("The startColumn must be less than the endColumn.");
 		
 		double[][] newContents = new double[rowCount()][endColumn - startColumn];
 		for(int i = 0; i < newContents.length; i++)

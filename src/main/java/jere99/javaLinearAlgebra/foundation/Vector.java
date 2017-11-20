@@ -14,12 +14,12 @@ public class Vector implements Cloneable {
 	/**
 	 * Generates a particular standard Vector in a m-space.
 	 * 
-	 * @param m the space in which the desired vector exists
+	 * @param n the space in which the desired vector exists
 	 * @param i the index of the standard vector in m-space
 	 * @return the specified standard vector
 	 */
-	public static Vector getStandardVector(int m, int i) {
-		double[] components = new double[m];
+	public static Vector getStandardVector(int n, int i) {
+		double[] components = new double[n];
 		components[i] = 1;
 		return new Vector(components);
 	}
@@ -113,9 +113,11 @@ public class Vector implements Cloneable {
 	 * 
 	 * @param i the index of the component to retrieve
 	 * @return the component at index {@code i}
-	 * @throws IllegalArgumentException if {@code i} is negative or exceeds the valid indices of components in this Vector
+	 * @throws VectorIndexOutOfBoundsException if {@code i} is negative or exceeds the valid indices of components in this Vector
 	 */
 	public double getComponent(int i) {
+		if(i < 0 || i >= components.length)
+			throw new VectorIndexOutOfBoundsException(i);
 		return components[i];
 	}
 	
