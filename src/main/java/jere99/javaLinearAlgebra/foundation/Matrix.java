@@ -1,6 +1,5 @@
 package jere99.javaLinearAlgebra.foundation;
 
-
 /**
  * Defines a matrix and provides matrix operations.
  * 
@@ -143,15 +142,39 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Generates a string representation of the Matrix.
+	 * Generates a string representation of the Matrix with the default precision of 3 places after the point.
 	 */
 	@Override
 	public String toString() {
-		StringBuffer result = new StringBuffer((4 + 6 * columnCount()) * rowCount());
+		return toString(3);
+	}
+	
+	/**
+	 * Generates a string representation of the Matrix with a particular precision.
+	 * 
+	 * @param precision the number of places after the point to be represented
+	 */
+	public String toString(int precision) {
+		int[] widths = new int[columnCount()];
+		for(double[] row : contents)
+			for(int j = 0; j < columnCount(); j++) {
+				double entry = row[j];
+				int width = (Math.rint(entry) == entry ? String.format("%,d", (int)entry) : String.format("%,." + precision + "f", entry)).length();
+				if(widths[j] < width)
+					widths[j] = width;
+			}
+		int rowWidth = 4;
+		for(int width : widths)
+			rowWidth += width + 1;
+		
+		StringBuffer result = new StringBuffer(rowCount() * rowWidth);
 		for(double[] row : contents) {
 			result.append("|");
-			for(double element : row)
-				result.append(String.format("%6s", (Math.rint(element) == element ? String.format("% d", (int)element) : String.format("% .3f", element))));
+			for(int j = 0; j < columnCount(); j++) {
+				result.append(' ');
+				double entry = row[j];
+				result.append((Math.rint(entry) == entry ? String.format("%," + widths[j] + "d", (int)entry) : String.format("%," + widths[j] + "." + precision + "f", entry)));
+			}
 			result.append(" |\n");
 		}
 		return result.toString();
