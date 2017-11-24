@@ -1,5 +1,7 @@
 package jere99.javaLinearAlgebra.foundation;
 
+import java.util.ArrayList;
+
 /**
  * Defines a matrix and provides matrix operations.
  * 
@@ -142,7 +144,7 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Generates a string representation of the Matrix with the default precision of 3 places after the point.
+	 * Generates a string representation of this Matrix with the default precision of 3 places after the point.
 	 */
 	@Override
 	public String toString() {
@@ -150,7 +152,7 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Generates a string representation of the Matrix with a particular precision.
+	 * Generates a string representation of this Matrix with a particular precision.
 	 * 
 	 * @param precision the number of places after the point to be represented
 	 */
@@ -376,7 +378,7 @@ public class Matrix implements Cloneable {
 	 * @return true if the system is consistent, false otherwise
 	 */
 	public boolean isConsistent() {
-		if(rank(true) == rowCount() || columnCount() == 1) //call to rank forces generation of rref
+		if(rank(true) == rowCount() || columnCount() == 1) // call to rank forces generation of rref
 			return true;
 		for(int i = rowCount() - 1; rref.contents[i][rref.columnCount() - 2] == 0; i--)
 			if(rref.contents[i][rref.columnCount() - 1] == 1)
@@ -672,19 +674,35 @@ public class Matrix implements Cloneable {
 	 */
 	public int rank(boolean augmented) {
 		Matrix rref = rref();
-		int rank = 0, i = 0, j = 0;
-		while(i < rref.rowCount()) {
-			while(j < rref.columnCount() - (augmented ? 1 : 0)) {
-				if(rref.contents[i][j] == 1) {
+		int rank = 0;
+		for(int i = 0, j = 0; i < rref.rowCount(); i++)
+			while(j < rref.columnCount() - (augmented ? 1 : 0))
+				if(rref.contents[i][j++] == 1) {
 					rank++;
-					j++;
 					break;
 				}
-				j++;
-			}
-			i++;
-		}
 		return rank;
+	}
+	
+	/**
+	 * Calculates the nullity of this Matrix.
+	 * Equivalent to calling {@code nullity(false)}
+	 * 
+	 * @return the nullity of this Matrix
+	 */
+	public int nullity() {
+		return nullity(false);
+	}
+	
+	/**
+	 * Calculates the nullity of this Matrix.
+	 * If this Matrix is flagged as being augmented, the last column will be ignored.
+	 * 
+	 * @param augmented true if this Matrix should be treated as an augmented matrix, false otherwise
+	 * @return the nullity of this Matrix
+	 */
+	public int nullity(boolean augmented) {
+		return columnCount() - rank(augmented);
 	}
 	
 	/**
@@ -708,33 +726,69 @@ public class Matrix implements Cloneable {
 	}
 	
 	/**
-	 * Calculates the solution for that system, if it exists.
 	 * Assumes that this instance is an augmented matrix which represents a system of linear equations.
+	 * Calculates the solution for that system, if a single solution exists.
 	 * 
 	 * @return the solution of the system if there is exactly one solution, null if there is no solution or infinitely many solutions
 	 */
-	public double[] findSolution() {
-		if(rank(true) != columnCount() - 1 || columnCount() == 1) //call to rank forces generation of rref
-			return null;
+	public Vector findSolution() {
+		if(rank(true) != columnCount() - 1 || columnCount() == 1) // call to rank forces generation of rref
+			return null; // infinitely many solutions or no solutions
 		for(int i = rref.rowCount() - 1; rref.contents[i][rref.columnCount() - 2] == 0; i--)
 			if(rref.contents[i][rref.columnCount() - 1] == 1)
-				return null;
+				return null; // no solutions
+		
 		double[] result = new double[rref.rowCount()];
 		for(int i = 0; i < result.length; i++)
 			result[i] = rref.contents[i][rref.columnCount() - 1];
-		return result;
+		return new Vector(result);
 	}
 	
 	/**
-	 * Calculates the solution for that system, if it exists.
 	 * Assumes that this instance is a coefficient matrix which when augmented with the passed column Vector represents a system of linear equations.
+	 * Calculates the solution for that system, if a single solution exists.
 	 * 
 	 * @param augment the column Vector to turn this coefficient matrix into an augmented matrix
 	 * @return the solution of the system if there is exactly one solution, null if there is no solution or infinitely many solutions
 	 * @throws IllegalArgumentException if the number of components of {@code augment} does not match the number of rows in this Matrix
 	 */
-	public double[] findSolution(Vector augment) {
+	public Vector findSolution(Vector augment) {
 		return this.augment(augment).findSolution();
+	}
+	
+	/**
+	 * Calculates the subspace <em>V</em> of <html>&#x211D<sup><em>n</em></sup></hmtl>
+	 * where <em>n</em> is the number of columns in this Matrix
+	 * which includes all Vectors <em>x</em>
+	 * for which the product of this Matrix and <em>x<em> is the zero vector in <html>&#x211D<sup><em>m</em></sup></hmtl>
+	 * where <em>m</em> is the number of rows in this Matrix
+	 * 
+	 * @return the VectorSpace which represents the solution set of this Matrix
+	 */
+	public VectorSpace findKernel() {
+		Matrix rref = rref();
+		boolean[] columnsAreFree = new boolean[columnCount()];
+		ArrayList<Integer> leadingOneColumns = new ArrayList<Integer>();
+		for(int i = 0, j = 0; i < rref.rowCount(); i++)
+			while(j < rref.columnCount()) {
+				columnsAreFree[j] = rref.contents[i][j] == 0;
+				if(rref.contents[i][j++] == 1) {
+					leadingOneColumns.add(j - 1);
+					break;
+				}
+			}
+		
+		ArrayList<Vector> basis = new ArrayList<Vector>(columnCount() - leadingOneColumns.size());
+		for(int j = 0; j < columnsAreFree.length; j++) {
+			if(columnsAreFree[j]) {
+				double[] components = new double[columnCount()];
+				components[j] = 1;
+				for(int i = 0; i < leadingOneColumns.size(); i++)
+					components[leadingOneColumns.get(i)] = -rref.getRowVector(i).getComponent(j);
+				basis.add(new Vector(components));
+			}
+		}
+		return new VectorSpace(new Basis(basis.toArray(new Vector[basis.size()])));
 	}
 	
 	/**

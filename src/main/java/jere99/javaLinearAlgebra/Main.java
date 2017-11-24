@@ -6,9 +6,8 @@ import jere99.javaLinearAlgebra.linearTransformations.*;
 public class Main {
 
 	public static void main(String[] args) {
-		Matrix m = new Matrix(new double[][] {{-2, 5, 2.135}, {124445, 0, -1.4}, {-135.1, -1, 4514.235123}});
-		System.out.println(m);
-		System.out.println(m.toString(5));
+		Matrix m = new Matrix(new double[][] {{1, 2, 2, -5, 6}, {-1, -2, -1, 1, -1}, {4, 8, 5, -8, 9}, {3, 6, 1, 5, -7}});
+		System.out.println(m.findKernel());
 	}
 
 }

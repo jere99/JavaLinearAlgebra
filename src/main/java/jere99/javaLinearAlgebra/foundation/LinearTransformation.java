@@ -2,14 +2,19 @@ package jere99.javaLinearAlgebra.foundation;
 
 /**
  * Defines a linear transformation.
- * A transformation, T, is linear from m-space to n-space if and only if:
+ * A transformation <em>T</em> from <html>&#x211D<sup><em>m</em></sup></hmtl></li> to <html>&#x211D<sup><em>n</em></sup></hmtl></li> is linear if and only if:
  * <ul>
- * <li>T(v + w) = T(v) + T(w) for all vectors v and w in m-space</li>
- * <li>T(kv) = kT(v) for all vectors v in m-space and all scalars k</li>
+ * <li>for all vectors <em>v</em> and <em>w</em> in <html>&#x211D<sup><em>m</em></sup></hmtl></li>
+ * <blockquote><em>T</em>(<em>v</em> + <em>w</em>) = <em>T</em>(<em>v</em>) + <em>T</em>(<em>w</em>)</blockquote>
+ * </li>
+ * <li>for all vectors <em>v</em> in <html>&#x211D<sup><em>m</em></sup></hmtl> and all scalars <em>k</em>
+ * <blockquote><em>T</em>(<em>kv</em>) = <em>kT</em>(<em>v</em>)</blockquote>
+ * </li>
  * </ul>
- * This is equivalent to saying that T transforms a vector in m-space into a vector in n-space by multiplying it by an n x m matrix.
+ * This is equivalent to saying that <em>T</em> transforms a vector in <html>&#x211D<sup><em>m</em></sup></hmtl></li> into a vector in <html>&#x211D<sup><em>n</em></sup></hmtl></li> by multiplying it by an <em>n</em> x <em>m</em> matrix.
  * 
  * @author JeremiahDeGreeff
+ * @see Vector
  */
 public class LinearTransformation {
 	
@@ -55,21 +60,46 @@ public class LinearTransformation {
 	}
 	
 	/**
-	 * Determines the vector space in which a Vector must exist to be a valid input to this LinearTransformation.
+	 * Determines the VectorSpace in which a Vector must exist to be a valid input to this LinearTransformation.
 	 * 
-	 * @return the only valid vector space for an input Vector to this LinearTransformation
+	 * @return the only valid VectorSpace for an input Vector to this LinearTransformation
 	 */
-	public int getInputSpace() {
-		return transformationMatrix.columnCount();
+	public VectorSpace getDomainSpace() {
+		return VectorSpace.getRealSpace(transformationMatrix.columnCount());
 	}
 	
 	/**
-	 * Determines the vector space in which any Vector that this LinearTransformation will output must exist.
+	 * Determines the VectorSpace in which any Vector that this LinearTransformation will output must exist.
 	 * 
-	 * @return the vector space for an output Vector from this LinearTransformation
+	 * @return the VectorSpace for an output Vector from this LinearTransformation
 	 */
-	public int getOutputSpace() {
-		return transformationMatrix.rowCount();
+	public VectorSpace getTargetSpace() {
+		return VectorSpace.getRealSpace(transformationMatrix.rowCount());
+	}
+	
+	/**
+	 * Calculates the kernel of this LinearTransformation,
+	 * that is the subspace of the domain space of this LinearTransformation, <em>T</em>, which contains all the Vectors, <em>x</em>, in the domain space for which
+	 * <blockquote><em>T</em>(<em>x</em>) = 0</blockquote>
+	 * 
+	 * @return the kernel of this LinearTransformation
+	 */
+	public VectorSpace getKernel() {
+		return transformationMatrix.findKernel();
+	}
+	
+	/**
+	 * Calculates the image of this LinearTransformation,
+	 * that is the subspace of the target space of this LinearTransformation, T, which contains all the vectors, v, in the target space for which there exists some vector, x, for which
+	 * <blockquote><em>T</em>(<em>x</em>) = <em>v</em></blockquote>
+	 * 
+	 * @return the image of this LinearTransformation
+	 */
+	public VectorSpace getImage() {
+		Vector[] columns = new Vector[transformationMatrix.columnCount()];
+		for(int j = 0; j < columns.length; j++)
+			columns[j] = transformationMatrix.getColumnVector(j);
+		return new VectorSpace(new Basis(Vector.removeRedundant(columns)));
 	}
 	
 	/**
@@ -94,8 +124,9 @@ public class LinearTransformation {
 	 * @throws ArithmeticException
 	 */
 	public Vector transform(Vector v) {
-		if(v.componentCount() != this.getInputSpace())
-			throw new ArithmeticException("This linear transformation can only transform a Vector that is in " + this.getInputSpace() + "-space");
+		if(v.componentCount() != getDomainSpace().dimension())
+			throw new ArithmeticException("This linear transformation can only transform a Vector that is in " + getDomainSpace().dimension() + "-space");
+		
 		return transformationMatrix.multiply(v);
 	}
 	

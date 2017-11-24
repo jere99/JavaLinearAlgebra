@@ -1,5 +1,7 @@
 package jere99.javaLinearAlgebra.foundation;
 
+import java.util.ArrayList;
+
 /**
  * Defines a vector and provides vector operations.
  * 
@@ -12,16 +14,84 @@ public class Vector implements Cloneable {
 	//================================================================================
 	
 	/**
-	 * Generates a particular standard Vector in a m-space.
+	 * Generates the zero vector in <html>&#x211D<sup><em>n</em></sup></hmtl>.
 	 * 
-	 * @param n the space in which the desired vector exists
-	 * @param i the index of the standard vector in m-space
+	 * @param n the dimension of the space in which the desired zero vector exists
+	 * @return the specified zero vector
+	 */
+	public static Vector getZeroVector(int n) {
+		return new Vector(new double[n]);
+	}
+	
+	/**
+	 * Generates a particular Vector from the standard basis of <html>&#x211D<sup><em>n</em></sup></hmtl>.
+	 * 
+	 * @param n the dimension of the space in which the desired Vector exists
+	 * @param i the index of the standard vector in <html>&#x211D<sup><em>n</em></sup></hmtl> [1, n] (not zero indexed
 	 * @return the specified standard vector
+	 * @throws IllegalArgumentException if {@code i} is not positive or exceeds {@code n}
 	 */
 	public static Vector getStandardVector(int n, int i) {
+		if(i < 1)
+			throw new IllegalArgumentException("The parameter i must be at least 1.");
+		if(i > n)
+			throw new IllegalArgumentException("The parameter i cannot exceed the parameter n.");
 		double[] components = new double[n];
-		components[i] = 1;
+		components[i - 1] = 1;
 		return new Vector(components);
+	}
+	
+	/**
+	 * Determines if an array of Vectors are linearly independent,
+	 * that is that none of the Vectors can be expressed as a linear combination of the other Vectors.
+	 * 
+	 * @param vectors the Vectors to test
+	 * @return true if the vectors are linearly independent, false otherwise
+	 * @throws IllegalArgumentException if any of the following is true:
+	 * <ul>
+	 * <li>{@code vectors} does not contain any elements</li>
+	 * <li>the Vectors in {@code vectors} are not all in the same space</li>
+	 * </ul>
+	 */
+	public static boolean areLinearlyIndependent(Vector[] vectors) {
+		if(vectors.length == 0)
+			throw new IllegalArgumentException("The array of vectors must include at least one element.");
+		int n = vectors[0].componentCount();
+		for(Vector v : vectors)
+			if(v.componentCount() != n)
+				throw new IllegalArgumentException("All the vectors must be in the same space.");
+		
+		return new Matrix(vectors).nullity() == 0;
+	}
+	
+	/**
+	 * Creates an array of Vectors which consists of those which are passed with any redundant Vectors removed.
+	 * In other words it creates an array of Vectors which form the basis of the subspace spanned by all of the passed Vectors.
+	 * 
+	 * @param vectors the Vectors to test - must all be in the same space
+	 * @return a new array consisting of the Vectors in {@code vectors} which are not redundant
+	 * @throws IllegalArgumentException if the Vectors in {@code vectors} are not all in the same space
+	 */
+	public static Vector[] removeRedundant(Vector[] vectors) {
+		if(vectors.length != 0) {
+			int n = vectors[0].componentCount();
+			for(Vector v : vectors)
+				if(v.componentCount() != n)
+					throw new IllegalArgumentException("All the vectors must be in the same space.");
+		}
+		
+		ArrayList<Vector> result = new ArrayList<Vector>();
+		int i = 0;
+		while(i < vectors.length && vectors[i].isZeroVector())
+			i++;
+		if(i < vectors.length) {
+			result.add(vectors[i]);
+			i++;
+		}
+		while(i < vectors.length)
+			if(!vectors[i].isLinearCombination((Vector[])result.toArray()))
+				result.add(vectors[i]);
+		return (Vector[])result.toArray();
 	}
 	
 	//================================================================================
@@ -30,7 +100,7 @@ public class Vector implements Cloneable {
 	
 	/**
 	 * The main contents of this vector.
-	 * The number of components indicates the space in which this vector exists.
+	 * The length of the array indicates the space in which this vector exists.
 	 */
 	private final double[] components;
 	
@@ -39,7 +109,7 @@ public class Vector implements Cloneable {
 	//================================================================================
 	
 	/**
-	 * Initializes a Vector with initial components.
+	 * Initializes a Vector with specified initial components.
 	 * 
 	 * @param initialComponents the initial components for the Vector
 	 * @throws IllegalArgumentException if {@code initialComponents} has length 0
@@ -93,14 +163,14 @@ public class Vector implements Cloneable {
 	}
 	
 	/**
-	 * Generates a string representation of the Vector.
+	 * Generates a string representation of this Vector.
 	 */
 	@Override
 	public String toString() {
-		StringBuffer result = new StringBuffer(components.length * 8); //allocates just under 6 characters per value
+		StringBuffer result = new StringBuffer(components.length * 6); // allocates just under 4 characters per value
 		result.append('<');
 		for(int i = 0; i < components.length; i++)
-			result.append((Math.rint(components[i]) == components[i] ? String.format("%d", (int)components[i]) : String.format("%.3f", components[i])) + (i == components.length - 1 ? ">\n" : ", "));
+			result.append((Math.rint(components[i]) == components[i] ? String.format("%d", (int)components[i]) : String.format("%.3f", components[i])) + (i == components.length - 1 ? ">" : ", "));
 		return result.toString();
 	}
 	
