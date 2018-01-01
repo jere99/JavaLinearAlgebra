@@ -1,13 +1,17 @@
 package jere99.javaLinearAlgebra;
 
+import java.util.Arrays;
+
 import jere99.javaLinearAlgebra.foundation.*;
 import jere99.javaLinearAlgebra.linearTransformations.*;
 
+@SuppressWarnings("unused")
 public class Main {
 
 	public static void main(String[] args) {
-		Matrix m = new Matrix(new double[][] {{1, 2, 2, -5, 6}, {-1, -2, -1, 1, -1}, {4, 8, 5, -8, 9}, {3, 6, 1, 5, -7}});
-		System.out.println(m.findKernel());
+		Vector[] vectors = new Vector[] {new Vector(new double[] {1, 1, 1}), new Vector(new double[] {1, 2, 3}), new Vector(new double[] {3, 4, 5})};
+		System.out.println(Arrays.toString(vectors));
+		System.out.println(Arrays.toString(Vector.removeRedundant(vectors)));
 	}
 
 }

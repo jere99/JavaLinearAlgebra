@@ -1,5 +1,6 @@
 package jere99.javaLinearAlgebra.foundation;
 
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -25,25 +26,24 @@ public class VectorSpace {
 	// Static Variables
 	//================================================================================
 	
-	private static TreeMap<Integer, VectorSpace> realSpaces = new TreeMap<Integer, VectorSpace>();
+	/**
+	 * Cached references to <html>&#x211D<sup><em>n</em></sup></hmtl> keyed by <em>n</em> value.
+	 */
+	private static Map<Integer, VectorSpace> realSpaces = new TreeMap<Integer, VectorSpace>();
 	
 	//================================================================================
 	// Static Methods
 	//================================================================================
 	
 	/**
-	 * Returns a reference to an instance of <html>&#x211D<sup><em>n</em></sup></hmtl> for a specified <em>n</em>.
+	 * Returns a reference to <html>&#x211D<sup><em>n</em></sup></hmtl> for a specified <em>n</em>.
 	 * 
-	 * @param n the dimension of the real space to return
-	 * @return a reference to the instance of the specified <html>&#x211D<sup><em>n</em></sup></hmtl>
+	 * @param n the dimension of the desired real space
+	 * @return the specified <html>&#x211D<sup><em>n</em></sup></hmtl>
 	 */
 	public static VectorSpace getRealSpace(int n) {
-		if(!realSpaces.containsKey(n)) {
-			Vector[] basis = new Vector[n];
-			for(int i = 0; i < n; i++)
-				basis[i] = Vector.getStandardVector(n, i + 1);
-			realSpaces.put(n, new VectorSpace(new Basis(basis)));
-		}
+		if(!realSpaces.containsKey(n))
+			realSpaces.put(n, new VectorSpace(Basis.standardBasis(n)));
 		return realSpaces.get(n);
 	}
 	
@@ -54,7 +54,7 @@ public class VectorSpace {
 	/**
 	 * A basis of this subspace.
 	 */
-	private Basis basis;
+	private final Basis basis;
 	
 	//================================================================================
 	// Constructors
@@ -86,7 +86,7 @@ public class VectorSpace {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		return this == obj || obj instanceof VectorSpace && (this.basis == ((VectorSpace) obj).basis || this.basis.isEquivalent(((VectorSpace) obj).basis));
+		return this == obj || obj instanceof VectorSpace && (this.basis == ((VectorSpace) obj).basis || this.basis.sameSubspace(((VectorSpace) obj).basis));
 	}
 	
 	/**
